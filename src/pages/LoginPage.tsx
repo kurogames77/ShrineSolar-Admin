@@ -100,7 +100,7 @@ export function LoginPage() {
               </button>
             </div>
 
-            <div className="flex items-center justify-between">
+            <div className="flex items-center">
               <div className="flex items-center">
                 <input
                   id="remember-me"
@@ -111,12 +111,6 @@ export function LoginPage() {
                 <label htmlFor="remember-me" className="ml-2 block text-sm text-slate-700 font-medium">
                   Remember me
                 </label>
-              </div>
-
-              <div className="text-sm">
-                <a href="#" className="font-medium text-amber-400 hover:text-amber-300 transition-colors">
-                  Forgot password?
-                </a>
               </div>
             </div>
 

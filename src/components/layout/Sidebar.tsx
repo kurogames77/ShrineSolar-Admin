@@ -105,7 +105,11 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
             </div>
           </div>
           <button
-            onClick={signOut}
+            onClick={() => {
+              if (window.confirm("Are you sure you want to sign out?")) {
+                signOut()
+              }
+            }}
             className="flex w-full items-center px-3 py-2.5 text-sm font-medium rounded-lg text-slate-600 hover:bg-red-50 hover:text-red-500 transition-colors"
           >
             <LogOut className="mr-3 h-5 w-5" />

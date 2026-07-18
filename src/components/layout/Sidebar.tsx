@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { NavLink } from 'react-router'
 import { 
   LayoutDashboard, 
@@ -19,6 +20,7 @@ interface SidebarProps {
 
 export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
   const { signOut, profile } = useAuth()
+  const [showLogoutModal, setShowLogoutModal] = useState(false)
 
   const navItems = [
     { name: 'Dashboard', href: '/', icon: LayoutDashboard },
@@ -105,11 +107,7 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
             </div>
           </div>
           <button
-            onClick={() => {
-              if (window.confirm("Are you sure you want to sign out?")) {
-                signOut()
-              }
-            }}
+            onClick={() => setShowLogoutModal(true)}
             className="flex w-full items-center px-3 py-2.5 text-sm font-medium rounded-lg text-slate-600 hover:bg-red-50 hover:text-red-500 transition-colors"
           >
             <LogOut className="mr-3 h-5 w-5" />
@@ -117,6 +115,32 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
           </button>
         </div>
       </div>
+
+      {showLogoutModal && (
+        <div className="fixed inset-0 z-[100] bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 animate-in fade-in zoom-in-95 duration-200">
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">Sign Out</h3>
+            <p className="text-slate-500 mb-6">Are you sure you want to sign out of your account?</p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowLogoutModal(false)}
+                className="px-4 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  setShowLogoutModal(false)
+                  signOut()
+                }}
+                className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-red-600 hover:bg-red-700 transition-colors shadow-sm"
+              >
+                Sign out
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }

@@ -1,0 +1,116 @@
+import { useState } from 'react'
+import { Menu, Bell, Check } from 'lucide-react'
+
+interface Notification {
+  id: string
+  title: string
+  message: string
+  time: string
+  read: boolean
+  type: 'order' | 'delivery' | 'system'
+}
+
+const initialNotifications: Notification[] = []
+
+interface TopbarProps {
+  onMenuClick: () => void
+}
+
+export function Topbar({ onMenuClick }: TopbarProps) {
+  const [showNotifs, setShowNotifs] = useState(false)
+  const [notifications, setNotifications] = useState(initialNotifications)
+
+  const unreadCount = notifications.filter(n => !n.read).length
+
+  const markAsRead = (id: string) => {
+    setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))
+  }
+  
+  const markAllAsRead = () => {
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })))
+  }
+
+
+  return (
+    <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-x-4 border-b border-slate-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
+      <button
+        type="button"
+        className="-m-2.5 p-2.5 text-slate-500 hover:text-slate-900 lg:hidden"
+        onClick={onMenuClick}
+      >
+        <span className="sr-only">Open sidebar</span>
+        <Menu className="h-6 w-6" aria-hidden="true" />
+      </button>
+
+      {/* Separator */}
+      <div className="h-6 w-px bg-slate-200 lg:hidden" aria-hidden="true" />
+
+      <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
+        <div className="flex flex-1 items-center">
+        </div>
+        <div className="flex items-center gap-x-4 lg:gap-x-6">
+
+          <div className="relative">
+            <button 
+              type="button" 
+              onClick={() => setShowNotifs(!showNotifs)}
+              className={`-m-2.5 p-2.5 transition-colors relative ${showNotifs ? 'text-amber-400' : 'text-slate-400 hover:text-amber-400'}`}
+            >
+              <span className="sr-only">View notifications</span>
+              <Bell className="h-5 w-5" aria-hidden="true" />
+              {unreadCount > 0 && (
+                <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-orange-500 ring-2 ring-white" />
+              )}
+            </button>
+            
+            {showNotifs && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setShowNotifs(false)} />
+                <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 rounded-xl bg-white border border-slate-200 shadow-2xl z-50 overflow-hidden animate-[fadeIn_0.15s_ease]">
+                  <div className="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+                    <h3 className="font-semibold text-slate-900">Notifications</h3>
+                    {unreadCount > 0 && (
+                      <button onClick={markAllAsRead} className="text-xs font-medium text-amber-600 hover:text-amber-500 transition-colors">
+                        Mark all as read
+                      </button>
+                    )}
+                  </div>
+                  <div className="max-h-[350px] overflow-y-auto">
+                    {notifications.length === 0 ? (
+                      <div className="p-8 text-center text-slate-500 text-sm">No notifications</div>
+                    ) : (
+                      <div className="divide-y divide-slate-100">
+                        {notifications.map(n => (
+                          <div key={n.id} className={`p-4 transition-colors hover:bg-slate-50 ${!n.read ? 'bg-amber-50/50' : ''}`}>
+                            <div className="flex gap-3">
+                              <div className={`mt-1.5 w-2 h-2 rounded-full shrink-0 ${!n.read ? 'bg-amber-400' : 'bg-transparent'}`} />
+                              <div className="flex-1 min-w-0">
+                                <p className={`text-sm font-medium ${!n.read ? 'text-slate-900' : 'text-slate-600'}`}>{n.title}</p>
+                                <p className="text-xs text-slate-400 mt-1 line-clamp-2">{n.message}</p>
+                                <p className="text-[10px] text-slate-500 mt-2 font-medium uppercase tracking-wider">{n.time}</p>
+                              </div>
+                              {!n.read && (
+                                <button onClick={() => markAsRead(n.id)} className="p-1.5 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition-colors self-start" title="Mark as read">
+                                  <Check className="h-3.5 w-3.5" />
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-2 border-t border-slate-200 bg-slate-50">
+                    <button className="w-full py-2 text-xs font-medium text-slate-500 hover:text-slate-900 transition-colors" onClick={() => setShowNotifs(false)}>
+                      View all notifications
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </header>
+  )
+}

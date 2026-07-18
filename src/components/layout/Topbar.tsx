@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Menu, Bell, Check } from 'lucide-react'
+import { supabase } from '../../lib/supabase'
 
 interface Notification {
   id: string
@@ -20,14 +21,76 @@ export function Topbar({ onMenuClick }: TopbarProps) {
   const [showNotifs, setShowNotifs] = useState(false)
   const [notifications, setNotifications] = useState(initialNotifications)
 
+  useEffect(() => {
+    const fetchRecentOrders = async () => {
+      const { data } = await supabase
+        .from('orders')
+        .select('*, customers(first_name, last_name)')
+        .order('order_date', { ascending: false })
+        .limit(10)
+        
+      if (data) {
+        const readIds = JSON.parse(localStorage.getItem('read_notifications') || '[]')
+        const notifs = data.map((d: any) => ({
+          id: d.id,
+          title: 'New Order Received',
+          message: `Order #${d.order_number} from ${d.customers ? d.customers.first_name + ' ' + d.customers.last_name : 'Unknown'}`,
+          time: new Date(d.order_date).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }),
+          read: readIds.includes(d.id),
+          type: 'order' as const
+        }))
+        setNotifications(notifs)
+      }
+    }
+    
+    fetchRecentOrders()
+
+    const subscription = supabase
+      .channel('orders_channel')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, (payload) => {
+        const fetchDetails = async () => {
+           const { data } = await supabase.from('orders').select('*, customers(first_name, last_name)').eq('id', payload.new.id).single()
+           if (data) {
+             const d = data as any;
+             const newNotif = {
+                id: d.id,
+                title: 'New Order Received',
+                message: `Order #${d.order_number} from ${d.customers ? d.customers.first_name + ' ' + d.customers.last_name : 'Unknown'}`,
+                time: new Date(d.order_date).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }),
+                read: false,
+                type: 'order' as const
+             }
+             setNotifications(prev => {
+                if (prev.some(n => n.id === newNotif.id)) return prev;
+                return [newNotif, ...prev];
+             })
+           }
+        }
+        fetchDetails()
+      })
+      .subscribe()
+      
+    return () => {
+      supabase.removeChannel(subscription)
+    }
+  }, [])
+
   const unreadCount = notifications.filter(n => !n.read).length
 
   const markAsRead = (id: string) => {
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))
+    const readIds = JSON.parse(localStorage.getItem('read_notifications') || '[]')
+    if (!readIds.includes(id)) {
+      localStorage.setItem('read_notifications', JSON.stringify([...readIds, id]))
+    }
   }
   
   const markAllAsRead = () => {
     setNotifications(prev => prev.map(n => ({ ...n, read: true })))
+    const allIds = notifications.map(n => n.id)
+    const readIds = JSON.parse(localStorage.getItem('read_notifications') || '[]')
+    const combined = Array.from(new Set([...readIds, ...allIds]))
+    localStorage.setItem('read_notifications', JSON.stringify(combined))
   }
 
 

@@ -15,23 +15,35 @@
 
 @layer base {
   :root {
-    color-scheme: dark;
+    color-scheme: light dark;
   }
   
   body {
-    background: #0a0e1a;
+    background: #f8fafc;
     min-height: 100vh;
-    color: #e2e8f0; /* slate-200 */
+    color: #0f172a; /* slate-900 */
     font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  .dark body {
+    background: #0a0e1a;
+    color: #e2e8f0; /* slate-200 */
   }
 }
 
 /* Glassmorphism utilities & Animations */
 @layer utilities {
   .glass {
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+  }
+  .dark .glass {
     background: rgba(10, 14, 26, 0.6);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
@@ -39,15 +51,22 @@
   }
   
   .glass-card {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .dark .glass-card {
     background: rgba(17, 24, 39, 0.7);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.05);
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
   
-  .glass-card:hover {
+  .dark .glass-card:hover {
     border-color: rgba(245, 158, 11, 0.3);
     box-shadow: 0 10px 40px rgba(245, 158, 11, 0.15), inset 0 0 20px rgba(245, 158, 11, 0.05);
     transform: translateY(-4px);
@@ -57,7 +76,7 @@
     transition: all 0.2s ease;
   }
   
-  .glass-table-row:hover {
+  .dark .glass-table-row:hover {
     background: rgba(245, 158, 11, 0.05);
     border-color: rgba(245, 158, 11, 0.2);
   }
@@ -72,8 +91,17 @@
   .hover-glow {
     transition: all 0.3s ease;
   }
-  .hover-glow:hover {
+  .dark .hover-glow:hover {
     text-shadow: 0 0 15px rgba(245, 158, 11, 0.6);
+  }
+
+  .dark-invert {
+    filter: invert(0);
+    transition: filter 0.3s ease;
+  }
+  .dark .dark-invert {
+    /* Using brightness and invert to turn black into white in dark mode */
+    filter: invert(1) brightness(2);
   }
 }
 

@@ -74,7 +74,7 @@ export function LoginPage() {
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md relative z-10">
-        <div className="glass-card py-8 px-4 sm:rounded-2xl sm:px-10 border border-white/10 shadow-[0_0_40px_rgba(0,0,0,0.5)]">
+        <div className="bg-slate-900/70 backdrop-blur-md py-8 px-4 sm:rounded-2xl sm:px-10 border border-white/10 shadow-[0_0_40px_rgba(0,0,0,0.5)]">
           <form className="space-y-6" onSubmit={handleLogin}>
             {error && (
               <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg text-sm flex items-center">
@@ -92,7 +92,7 @@ export function LoginPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="pl-10"
+                className="pl-10 text-white bg-slate-900/50 border-white/10 focus:border-amber-500/50 focus:ring-amber-500/20"
               />
               <User className="absolute left-3 top-[34px] h-5 w-5 text-slate-500" />
             </div>
@@ -107,7 +107,7 @@ export function LoginPage() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="pl-10 pr-10"
+                className="pl-10 pr-10 text-white bg-slate-900/50 border-white/10 focus:border-amber-500/50 focus:ring-amber-500/20"
               />
               <Lock className="absolute left-3 top-[34px] h-5 w-5 text-slate-500" />
               <button
@@ -125,17 +125,28 @@ export function LoginPage() {
             </div>
 
             <div className="flex items-center">
-              <div className="flex items-center group cursor-pointer">
-                <input
-                  id="remember-me"
-                  name="remember-me"
-                  type="checkbox"
-                  className="h-4 w-4 rounded bg-slate-900/50 border-slate-600 text-amber-500 focus:ring-amber-500 focus:ring-offset-[#0a0e1a] cursor-pointer"
-                />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-slate-400 font-medium group-hover:text-slate-200 transition-colors cursor-pointer">
+              <label htmlFor="remember-me" className="flex items-center group cursor-pointer">
+                <div className="relative flex items-center justify-center w-5 h-5 mr-2 bg-slate-900/50 border border-slate-600 rounded transition-colors group-hover:border-amber-500">
+                  <input
+                    id="remember-me"
+                    name="remember-me"
+                    type="checkbox"
+                    className="absolute opacity-0 w-full h-full cursor-pointer peer"
+                  />
+                  <svg 
+                    className="w-3 h-3 text-amber-500 opacity-0 peer-checked:opacity-100 transition-opacity" 
+                    fill="none" 
+                    viewBox="0 0 24 24" 
+                    stroke="currentColor" 
+                    strokeWidth={3}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <span className="text-sm text-slate-400 font-medium group-hover:text-slate-200 transition-colors">
                   Remember me
-                </label>
-              </div>
+                </span>
+              </label>
             </div>
 
             {/* Cloudflare Turnstile Widget */}

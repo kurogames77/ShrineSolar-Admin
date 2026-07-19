@@ -9,7 +9,7 @@ const actionColors: Record<string, string> = {
   create: 'text-emerald-600 bg-emerald-50',
   update: 'text-blue-600 bg-blue-50',
   delete: 'text-red-600 bg-red-50',
-  login: 'text-slate-600 bg-slate-100',
+  login: 'text-slate-600 dark:text-slate-300 bg-slate-100',
   // Order statuses
   pending: 'text-amber-600 bg-amber-50',
   completed: 'text-emerald-600 bg-emerald-50',
@@ -59,7 +59,7 @@ export function ActivityLogPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight text-slate-900">Activity Log</h2>
+        <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Activity Log</h2>
         <p className="text-sm text-slate-500 mt-1">Track all actions performed by admin users.</p>
       </div>
 
@@ -73,7 +73,7 @@ export function ActivityLogPage() {
             <div className="relative w-full sm:w-64">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <input
-                className="h-9 w-full rounded-lg bg-white border border-slate-300 pl-9 pr-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors"
+                className="h-9 w-full rounded-lg bg-white border border-slate-300 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white pl-9 pr-3 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors"
                 placeholder="Search activity..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -94,7 +94,7 @@ export function ActivityLogPage() {
                     'px-3 py-1.5 text-xs font-medium rounded-lg border transition-all capitalize',
                     filterEntity === e
                       ? 'border-amber-500/30 bg-amber-50 text-amber-600'
-                      : 'border-slate-200 bg-white text-slate-600 hover:text-slate-900 hover:border-slate-300'
+                      : 'border-slate-200 bg-white text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:text-white hover:border-slate-300'
                   )}
                 >
                   {e === 'all' ? 'All' : e}
@@ -113,11 +113,11 @@ export function ActivityLogPage() {
                 <div className="mt-0.5 text-lg">{entityIcons[activity.entityType] || '📋'}</div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-sm font-medium text-slate-900">{activity.userName}</span>
-                    <span className={cn('px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider', actionColors[activity.action] || 'text-slate-600 bg-slate-100')}>
+                    <span className="text-sm font-medium text-slate-900 dark:text-white">{activity.userName}</span>
+                    <span className={cn('px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider', actionColors[activity.action] || 'text-slate-600 dark:text-slate-300 bg-slate-100')}>
                       {activity.action.replace('_', ' ')}
                     </span>
-                    <span className="text-sm text-slate-600">
+                    <span className="text-sm text-slate-600 dark:text-slate-300">
                       {activity.entityType} <span className="text-amber-600 font-medium">{activity.entityName}</span>
                     </span>
                   </div>

@@ -178,7 +178,7 @@ export function InstallationListPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-slate-900">Installations</h2>
+          <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Installations</h2>
           <p className="text-sm text-slate-500 mt-1">Track installation pipeline.</p>
         </div>
         <Button variant="secondary" onClick={downloadCompletedInstallations} className="shrink-0">
@@ -195,7 +195,7 @@ export function InstallationListPage() {
               <div className={cn('flex items-center justify-center mx-auto mb-2')}>
                 <p.icon className={cn('h-6 w-6', p.color)} />
               </div>
-              <p className="text-2xl font-bold text-slate-900">{counts[p.key] || 0}</p>
+              <p className="text-2xl font-bold text-slate-900 dark:text-white">{counts[p.key] || 0}</p>
               <p className="text-xs text-slate-500 mt-0.5">{p.label}</p>
             </CardContent>
           </Card>
@@ -205,7 +205,7 @@ export function InstallationListPage() {
       {/* Filter tabs */}
       <div className="flex gap-2 flex-wrap">
         {statusTabs.map(s => (
-          <button key={s} onClick={() => { setStatusFilter(s); setPage(1) }} className={cn('px-3 py-1.5 text-xs font-medium rounded-lg border transition-all capitalize', statusFilter === s ? 'border-amber-500/30 bg-amber-50 text-amber-600' : 'border-slate-200 bg-white text-slate-600 hover:text-slate-900 hover:border-slate-300')}>
+          <button key={s} onClick={() => { setStatusFilter(s); setPage(1) }} className={cn('px-3 py-1.5 text-xs font-medium rounded-lg border transition-all capitalize', statusFilter === s ? 'border-amber-500/30 bg-amber-50 text-amber-600' : 'border-slate-200 bg-white text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:text-white hover:border-slate-300')}>
             {s === 'all' ? 'All' : s.replace('_', ' ')}
           </button>
         ))}
@@ -216,19 +216,19 @@ export function InstallationListPage() {
           <div className="p-4 border-b border-slate-200">
             <div className="relative w-full sm:w-80">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-              <input className="h-9 w-full rounded-lg bg-white border border-slate-300 pl-9 pr-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors" placeholder="Search by order # or customer..." value={search} onChange={(e) => { setSearch(e.target.value); setPage(1) }} />
+              <input className="h-9 w-full rounded-lg bg-white border border-slate-300 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white pl-9 pr-3 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors" placeholder="Search by order # or customer..." value={search} onChange={(e) => { setSearch(e.target.value); setPage(1) }} />
             </div>
           </div>
           <div className="overflow-x-auto mobile-scroll">
             <table className="w-full text-sm whitespace-nowrap">
               <thead>
                 <tr className="border-b border-slate-200">
-                  <th className="text-left py-3 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Order #</th>
-                  <th className="text-left py-3 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Customer</th>
-                  <th className="text-left py-3 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
-                  <th className="text-left py-3 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Schedule</th>
-                  <th className="text-left py-3 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Completed</th>
-                  {canEditRecords && <th className="text-right py-3 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Actions</th>}
+                  <th className="text-left py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Order #</th>
+                  <th className="text-left py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Customer</th>
+                  <th className="text-left py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Status</th>
+                  <th className="text-left py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Schedule</th>
+                  <th className="text-left py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Completed</th>
+                  {canEditRecords && <th className="text-right py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Actions</th>}
                 </tr>
               </thead>
               <tbody>
@@ -238,9 +238,9 @@ export function InstallationListPage() {
                   paged.map(inst => (
                     <tr key={inst.id} className="border-b border-slate-200 hover:bg-slate-50 transition-colors">
                       <td className="py-3 px-4 font-mono text-amber-600 font-medium">{inst.order_number}</td>
-                      <td className="py-3 px-4 text-slate-900 font-medium">{inst.customer_name}</td>
+                      <td className="py-3 px-4 text-slate-900 dark:text-white font-medium">{inst.customer_name}</td>
                       <td className="py-3 px-4"><StatusBadge status={inst.installation_status} /></td>
-                      <td className="py-3 px-4 text-slate-600">{fmtDate(inst.scheduled_date)}</td>
+                      <td className="py-3 px-4 text-slate-600 dark:text-slate-300">{fmtDate(inst.scheduled_date)}</td>
                       <td className="py-3 px-4 text-slate-500">{fmtDate(inst.completion_date)}</td>
                       {canEditRecords && (
                         <td className="py-3 px-4 text-right">
@@ -249,7 +249,7 @@ export function InstallationListPage() {
                               Completed
                             </span>
                           ) : (
-                            <select value={inst.installation_status} onChange={(e) => handleStatusChange(inst.id, e.target.value)} className="h-7 rounded bg-white border border-slate-300 px-2 text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-amber-500 transition-colors capitalize">
+                            <select value={inst.installation_status} onChange={(e) => handleStatusChange(inst.id, e.target.value)} className="h-7 rounded bg-white border border-slate-300 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white px-2 text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-amber-500 transition-colors capitalize">
                               {inst.installation_status === 'scheduled' && <option value="scheduled" hidden>Scheduled</option>}
                               {inst.installation_status === 'site_survey' && <option value="site_survey" hidden>Site Survey</option>}
                               {inst.installation_status === 'in_progress' && <option value="in_progress" hidden>In Progress</option>}
@@ -276,11 +276,11 @@ export function InstallationListPage() {
             <div className="flex items-center justify-between px-4 py-3 border-t border-slate-200">
               <p className="text-xs text-slate-500">Showing {(page - 1) * perPage + 1}–{Math.min(page * perPage, filtered.length)} of {filtered.length}</p>
               <div className="flex items-center gap-1">
-                <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 disabled:opacity-30 disabled:pointer-events-none transition-colors"><ChevronLeft className="h-4 w-4" /></button>
+                <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 dark:text-white hover:bg-slate-100 disabled:opacity-30 disabled:pointer-events-none transition-colors"><ChevronLeft className="h-4 w-4" /></button>
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
-                  <button key={p} onClick={() => setPage(p)} className={cn('h-8 w-8 rounded-lg text-xs font-medium transition-colors', p === page ? 'bg-amber-50 text-amber-600' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100')}>{p}</button>
+                  <button key={p} onClick={() => setPage(p)} className={cn('h-8 w-8 rounded-lg text-xs font-medium transition-colors', p === page ? 'bg-amber-50 text-amber-600' : 'text-slate-500 hover:text-slate-900 dark:text-white hover:bg-slate-100')}>{p}</button>
                 ))}
-                <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 disabled:opacity-30 disabled:pointer-events-none transition-colors"><ChevronRight className="h-4 w-4" /></button>
+                <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 dark:text-white hover:bg-slate-100 disabled:opacity-30 disabled:pointer-events-none transition-colors"><ChevronRight className="h-4 w-4" /></button>
               </div>
             </div>
           )}
@@ -292,8 +292,8 @@ export function InstallationListPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-[fadeIn_0.2s_ease]">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden animate-[slideIn_0.2s_ease]">
             <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
-              <h3 className="font-semibold text-slate-900">Reschedule Installation</h3>
-              <button onClick={() => setRescheduleModal({ isOpen: false, instId: null })} className="text-slate-400 hover:text-slate-600 transition-colors">
+              <h3 className="font-semibold text-slate-900 dark:text-white">Reschedule Installation</h3>
+              <button onClick={() => setRescheduleModal({ isOpen: false, instId: null })} className="text-slate-400 hover:text-slate-600 dark:text-slate-300 transition-colors">
                 <X className="h-5 w-5" />
               </button>
             </div>

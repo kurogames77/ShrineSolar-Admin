@@ -178,7 +178,7 @@ export function CustomerListPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-slate-900">Customers</h2>
+          <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Customers</h2>
           <p className="text-sm text-slate-500 mt-1">{filtered.length} total customers</p>
         </div>
         {canCreateRecords && (
@@ -218,7 +218,7 @@ export function CustomerListPage() {
                     <th
                       key={col.key}
                       onClick={() => toggleSort(col.key)}
-                      className="text-left py-3 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider cursor-pointer hover:text-slate-800 transition-colors group select-none"
+                      className="text-left py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider cursor-pointer hover:text-slate-800 transition-colors group select-none"
                     >
                       <div className="flex items-center gap-1">
                         {col.label}
@@ -227,7 +227,7 @@ export function CustomerListPage() {
                     </th>
                   ))}
                   {(canEditRecords || canDeleteRecords) && (
-                    <th className="text-right py-3 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Actions</th>
+                    <th className="text-right py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Actions</th>
                   )}
                 </tr>
               </thead>
@@ -246,7 +246,7 @@ export function CustomerListPage() {
                           <div className="h-8 w-8 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center text-xs font-medium text-slate-700 border border-slate-200">
                             {c.first_name[0]}{c.last_name[0]}
                           </div>
-                          <span className="font-medium text-slate-900">{c.first_name} {c.last_name}</span>
+                          <span className="font-medium text-slate-900 dark:text-white">{c.first_name} {c.last_name}</span>
                         </div>
                       </td>
                       <td className="py-3 px-4 text-slate-700">{c.email}</td>
@@ -294,15 +294,15 @@ export function CustomerListPage() {
                 Showing {(page - 1) * perPage + 1}–{Math.min(page * perPage, sorted.length)} of {sorted.length}
               </p>
               <div className="flex items-center gap-1">
-                <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-white/5 disabled:opacity-30 disabled:pointer-events-none transition-colors">
+                <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 dark:text-white hover:bg-white/5 disabled:opacity-30 disabled:pointer-events-none transition-colors">
                   <ChevronLeft className="h-4 w-4" />
                 </button>
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
-                  <button key={p} onClick={() => setPage(p)} className={cn('h-8 w-8 rounded-lg text-xs font-medium transition-colors', p === page ? 'bg-amber-500/20 text-amber-400' : 'text-slate-500 hover:text-slate-900 hover:bg-white/5')}>
+                  <button key={p} onClick={() => setPage(p)} className={cn('h-8 w-8 rounded-lg text-xs font-medium transition-colors', p === page ? 'bg-amber-500/20 text-amber-400' : 'text-slate-500 hover:text-slate-900 dark:text-white hover:bg-white/5')}>
                     {p}
                   </button>
                 ))}
-                <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-white/5 disabled:opacity-30 disabled:pointer-events-none transition-colors">
+                <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 dark:text-white hover:bg-white/5 disabled:opacity-30 disabled:pointer-events-none transition-colors">
                   <ChevronRight className="h-4 w-4" />
                 </button>
               </div>
@@ -317,8 +317,8 @@ export function CustomerListPage() {
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => { setShowModal(false); setEditingCustomer(null); }} />
           <div className="relative glass-card rounded-2xl p-6 w-full max-w-lg animate-[fadeIn_0.2s_ease] max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-5">
-              <h3 className="text-lg font-semibold text-slate-900">{editingCustomer ? 'Edit Customer' : 'Add New Customer'}</h3>
-              <button onClick={() => { setShowModal(false); setEditingCustomer(null); }} className="p-1 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-white/5"><X className="h-5 w-5" /></button>
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white">{editingCustomer ? 'Edit Customer' : 'Add New Customer'}</h3>
+              <button onClick={() => { setShowModal(false); setEditingCustomer(null); }} className="p-1 rounded-lg text-slate-500 hover:text-slate-900 dark:text-white hover:bg-white/5"><X className="h-5 w-5" /></button>
             </div>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
@@ -343,10 +343,10 @@ export function CustomerListPage() {
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setCustomerToDelete(null)} />
           <div className="relative glass-card rounded-2xl p-6 w-full max-w-sm animate-[fadeIn_0.2s_ease]">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-slate-900">Delete Customer</h3>
-              <button onClick={() => setCustomerToDelete(null)} className="p-1 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-white/5"><X className="h-5 w-5" /></button>
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Delete Customer</h3>
+              <button onClick={() => setCustomerToDelete(null)} className="p-1 rounded-lg text-slate-500 hover:text-slate-900 dark:text-white hover:bg-white/5"><X className="h-5 w-5" /></button>
             </div>
-            <p className="text-sm text-slate-600 mb-6">Are you sure you want to delete this customer? This action cannot be undone.</p>
+            <p className="text-sm text-slate-600 dark:text-slate-300 mb-6">Are you sure you want to delete this customer? This action cannot be undone.</p>
             <div className="flex gap-3 justify-end">
               <Button type="button" variant="ghost" onClick={() => setCustomerToDelete(null)}>Cancel</Button>
               <Button type="button" className="bg-red-500 hover:bg-red-600 text-white shadow-red-500/20" onClick={confirmDelete}>Delete</Button>

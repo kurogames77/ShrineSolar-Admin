@@ -63,7 +63,7 @@ export function DashboardPage() {
             <CardContent className="p-6 h-full flex flex-col justify-between relative z-10">
               <div>
                 <p className="text-sm font-medium text-slate-500 group-hover:text-slate-700 transition-colors dark:text-slate-400 dark:group-hover:text-amber-200">{kpi.name}</p>
-                <p className="mt-1 text-4xl font-bold text-slate-900 group-hover:text-slate-800 transition-colors dark:text-white dark:group-hover:text-amber-400">
+                <p className="mt-1 text-4xl font-bold text-slate-900 dark:text-white group-hover:text-slate-800 transition-colors dark:text-white dark:group-hover:text-amber-400">
                   {isLoading ? '...' : kpi.value}
                 </p>
               </div>
@@ -91,7 +91,7 @@ export function DashboardPage() {
                 {recentOrders.map((order: any) => (
                   <div key={order.id} className="flex items-center justify-between p-3 rounded-lg bg-slate-50 border border-slate-100 dark:glass-table-row dark:bg-slate-900/50 dark:border-white/5">
                     <div>
-                      <p className="text-sm font-medium text-slate-900 font-mono dark:text-white">{order.order_number}</p>
+                      <p className="text-sm font-medium text-slate-900 dark:text-white font-mono dark:text-white">{order.order_number}</p>
                       <p className="text-xs text-slate-500 dark:text-slate-400">
                         {order.customers ? `${order.customers.first_name} ${order.customers.last_name}` : 'Unknown'}
                       </p>
@@ -121,7 +121,7 @@ export function DashboardPage() {
                 {recentInstallations.map((inst: any) => (
                   <div key={inst.id} className="flex items-center justify-between p-3 rounded-lg bg-slate-50 border border-slate-100 dark:glass-table-row dark:bg-slate-900/50 dark:border-white/5">
                     <div>
-                      <p className="text-sm font-medium text-slate-900 font-mono dark:text-white">{inst.orders?.order_number || 'N/A'}</p>
+                      <p className="text-sm font-medium text-slate-900 dark:text-white font-mono dark:text-white">{inst.orders?.order_number || 'N/A'}</p>
                       <p className="text-xs text-slate-500 dark:text-slate-400">
                         {inst.orders?.customers ? `${inst.orders.customers.first_name} ${inst.orders.customers.last_name}` : 'Unknown'}
                       </p>

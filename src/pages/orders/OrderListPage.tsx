@@ -268,7 +268,7 @@ export function OrderListPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-slate-900">Orders</h2>
+          <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Orders</h2>
           <p className="text-sm text-slate-500 mt-1">{filtered.length} orders found</p>
         </div>
         <div className="flex items-center gap-2">
@@ -295,7 +295,7 @@ export function OrderListPage() {
               'px-3 py-1.5 text-xs font-medium rounded-lg border transition-all capitalize',
               statusFilter === s
                 ? 'border-amber-500/30 bg-amber-50 text-amber-600'
-                : 'border-slate-200 bg-white text-slate-600 hover:text-slate-900 hover:border-slate-300'
+                : 'border-slate-200 bg-white text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:text-white hover:border-slate-300'
             )}
           >
             {s === 'all' ? 'All' : s.replace('_', ' ')} ({statusCounts[s] || 0})
@@ -308,7 +308,7 @@ export function OrderListPage() {
           <div className="p-4 border-b border-slate-200">
             <div className="relative w-full sm:w-80">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-              <input className="h-9 w-full rounded-lg bg-white border border-slate-300 pl-9 pr-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors" placeholder="Search by order #, customer, or panel..." value={search} onChange={(e) => { setSearch(e.target.value); setPage(1) }} />
+              <input className="h-9 w-full rounded-lg bg-white border border-slate-300 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white pl-9 pr-3 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors" placeholder="Search by order #, customer, or panel..." value={search} onChange={(e) => { setSearch(e.target.value); setPage(1) }} />
             </div>
           </div>
 
@@ -325,14 +325,14 @@ export function OrderListPage() {
                     { key: 'status' as SortKey, label: 'Status' },
                     { key: 'order_date' as SortKey, label: 'Order Date' },
                   ] as Array<{ key: SortKey; label: string; sortable?: boolean }>).map((col, i) => (
-                    <th key={i} onClick={() => col.sortable !== false && toggleSort(col.key)} className={cn("text-left py-3 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider group select-none", col.sortable !== false && 'cursor-pointer hover:text-slate-900 transition-colors')}>
+                    <th key={i} onClick={() => col.sortable !== false && toggleSort(col.key)} className={cn("text-left py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider group select-none", col.sortable !== false && 'cursor-pointer hover:text-slate-900 dark:text-white transition-colors')}>
                       <div className="flex items-center gap-1">
                         {col.label}
                         {col.sortable !== false && <SortIcon col={col.key} />}
                       </div>
                     </th>
                   ))}
-                  {canEditRecords && <th className="text-right py-3 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Actions</th>}
+                  {canEditRecords && <th className="text-right py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Actions</th>}
                 </tr>
               </thead>
               <tbody>
@@ -342,9 +342,9 @@ export function OrderListPage() {
                   paged.map(o => (
                     <tr key={o.id} className="border-b border-slate-200 hover:bg-slate-50 transition-colors">
                       <td className="py-3 px-4 font-mono text-amber-600 font-medium">{o.order_number}</td>
-                      <td className="py-3 px-4 text-slate-900 font-medium">{o.customer_name}</td>
-                      <td className="py-3 px-4 text-slate-600">{o.product_details}</td>
-                      <td className="py-3 px-4 text-slate-600">
+                      <td className="py-3 px-4 text-slate-900 dark:text-white font-medium">{o.customer_name}</td>
+                      <td className="py-3 px-4 text-slate-600 dark:text-slate-300">{o.product_details}</td>
+                      <td className="py-3 px-4 text-slate-600 dark:text-slate-300">
                         {o.size_or_qty} {o.product_details.startsWith('Battery') ? 'kWh' : o.product_details.startsWith('Accessory') ? 'pcs' : 'kW'}
                       </td>
                       <td className="py-3 px-4 text-emerald-600 font-semibold">{fmt(o.total_amount)}</td>
@@ -360,7 +360,7 @@ export function OrderListPage() {
                             <select
                               defaultValue=""
                               onChange={(e) => handleStatusChange(o.id, e.target.value as Order['status'])}
-                              className="h-7 rounded bg-white border border-slate-300 px-2 text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-amber-500 transition-colors capitalize"
+                              className="h-7 rounded bg-white border border-slate-300 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white px-2 text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-amber-500 transition-colors capitalize"
                             >
                               <option value="" disabled>Select Action</option>
                               <option value="completed">Completed</option>
@@ -382,11 +382,11 @@ export function OrderListPage() {
             <div className="flex items-center justify-between px-4 py-3 border-t border-slate-200">
               <p className="text-xs text-slate-500">Showing {(page - 1) * perPage + 1}–{Math.min(page * perPage, sorted.length)} of {sorted.length}</p>
               <div className="flex items-center gap-1">
-                <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 disabled:opacity-30 disabled:pointer-events-none transition-colors"><ChevronLeft className="h-4 w-4" /></button>
+                <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 dark:text-white hover:bg-slate-100 disabled:opacity-30 disabled:pointer-events-none transition-colors"><ChevronLeft className="h-4 w-4" /></button>
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
-                  <button key={p} onClick={() => setPage(p)} className={cn('h-8 w-8 rounded-lg text-xs font-medium transition-colors', p === page ? 'bg-amber-50 text-amber-600' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100')}>{p}</button>
+                  <button key={p} onClick={() => setPage(p)} className={cn('h-8 w-8 rounded-lg text-xs font-medium transition-colors', p === page ? 'bg-amber-50 text-amber-600' : 'text-slate-500 hover:text-slate-900 dark:text-white hover:bg-slate-100')}>{p}</button>
                 ))}
-                <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 disabled:opacity-30 disabled:pointer-events-none transition-colors"><ChevronRight className="h-4 w-4" /></button>
+                <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 dark:text-white hover:bg-slate-100 disabled:opacity-30 disabled:pointer-events-none transition-colors"><ChevronRight className="h-4 w-4" /></button>
               </div>
             </div>
           )}
@@ -399,13 +399,13 @@ export function OrderListPage() {
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={closeModal} />
           <div className="relative bg-white shadow-xl border border-slate-200 rounded-2xl p-6 w-full max-w-lg animate-[fadeIn_0.2s_ease] max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-5">
-              <h3 className="text-lg font-semibold text-slate-900">Create New Order</h3>
-              <button type="button" onClick={closeModal} className="p-1 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-slate-100"><X className="h-5 w-5" /></button>
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Create New Order</h3>
+              <button type="button" onClick={closeModal} className="p-1 rounded-lg text-slate-400 hover:text-slate-900 dark:text-white hover:bg-slate-100"><X className="h-5 w-5" /></button>
             </div>
             <form onSubmit={handleAdd} className="space-y-4">
               <div className="space-y-1.5">
                 <label className="text-sm font-medium text-slate-700">Customer <span className="text-red-500">*</span></label>
-                <select name="customerId" className="flex h-10 w-full rounded-lg bg-white border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-colors" required defaultValue="">
+                <select name="customerId" className="flex h-10 w-full rounded-lg bg-white border border-slate-300 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500 transition-colors" required defaultValue="">
                   <option value="" disabled>Select a customer...</option>
                   {customers.map(c => (
                     <option key={c.id} value={c.id}>{c.name}</option>
@@ -418,7 +418,7 @@ export function OrderListPage() {
                   name="orderCategory" 
                   value={orderCategory}
                   onChange={(e) => { setOrderCategory(e.target.value); setQuantity(''); setPrice(''); setAmount(''); }}
-                  className="flex h-10 w-full rounded-lg bg-white border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-colors"
+                  className="flex h-10 w-full rounded-lg bg-white border border-slate-300 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500 transition-colors"
                   required
                 >
                   <option value="" disabled>Select a category...</option>
@@ -433,7 +433,7 @@ export function OrderListPage() {
                 <>
                   <div className="space-y-1.5">
                     <label className="text-sm font-medium text-slate-700">Panel Type</label>
-                    <select name="product_details" className="flex h-10 w-full rounded-lg bg-white border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-colors">
+                    <select name="product_details" className="flex h-10 w-full rounded-lg bg-white border border-slate-300 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500 transition-colors">
                       <option>Trina Solar Vertex S</option>
                       <option>Trina Solar Vertex N</option>
                       <option>Canadian Solar HiKu7</option>
@@ -458,7 +458,7 @@ export function OrderListPage() {
                 <>
                   <div className="space-y-1.5">
                     <label className="text-sm font-medium text-slate-700">Battery Model <span className="text-red-500">*</span></label>
-                    <select name="batteryModel" className="flex h-10 w-full rounded-lg bg-white border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-colors" required>
+                    <select name="batteryModel" className="flex h-10 w-full rounded-lg bg-white border border-slate-300 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500 transition-colors" required>
                       <option value="Tesla Powerwall 2">Tesla Powerwall 2</option>
                       <option value="Enphase IQ Battery 10">Enphase IQ Battery 10</option>
                       <option value="LG RESU10H">LG RESU10H</option>
@@ -482,7 +482,7 @@ export function OrderListPage() {
                 <>
                   <div className="space-y-1.5">
                     <label className="text-sm font-medium text-slate-700">Inverter Model <span className="text-red-500">*</span></label>
-                    <select name="inverterModel" className="flex h-10 w-full rounded-lg bg-white border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-colors" required>
+                    <select name="inverterModel" className="flex h-10 w-full rounded-lg bg-white border border-slate-300 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500 transition-colors" required>
                       <option value="SolarEdge Energy Hub">SolarEdge Energy Hub</option>
                       <option value="Enphase IQ8 Microinverter">Enphase IQ8 Microinverter</option>
                       <option value="Fronius Primo">Fronius Primo</option>

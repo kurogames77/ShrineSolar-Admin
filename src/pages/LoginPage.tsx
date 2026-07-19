@@ -142,7 +142,7 @@ export function LoginPage() {
             <div className="flex flex-col items-center justify-center pt-2">
               <div 
                 className="cf-turnstile" 
-                data-sitekey="1x00000000000000000000AA" 
+                data-sitekey="0x4AAAAAAD5TN93fLM-OyEjz" 
                 data-callback="onTurnstileSuccess"
                 data-theme="dark"
               ></div>

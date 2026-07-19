@@ -42,16 +42,16 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
 
       <div
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-72 transform flex flex-col bg-white border-r border-slate-200 transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 lg:w-64",
+          "fixed inset-y-0 left-0 z-50 w-72 transform flex flex-col bg-[#0a0e1a]/95 backdrop-blur-md border-r border-white/5 transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 lg:w-64",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <div className="flex h-16 shrink-0 items-center justify-between px-4 border-b border-slate-200 overflow-hidden">
+        <div className="flex h-16 shrink-0 items-center justify-between px-4 border-b border-white/5 overflow-hidden">
           <div className="flex items-center w-full pr-2">
             <img src="/banner.png" alt="Shrine Solar" className="h-16 w-full object-contain scale-110 origin-left" />
           </div>
           <button 
-            className="lg:hidden text-slate-400 hover:text-slate-900 shrink-0"
+            className="lg:hidden text-slate-400 hover:text-white shrink-0 hover-glow"
             onClick={() => setIsOpen(false)}
           >
             <X size={20} />
@@ -66,10 +66,10 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
                   key={item.name}
                   to={item.href}
                   className={({ isActive }) => cn(
-                    "group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200",
+                    "group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-300 relative overflow-hidden",
                     isActive 
-                      ? "bg-amber-500/10 text-amber-600" 
-                      : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                      ? "bg-gradient-to-r from-amber-500/20 to-transparent text-amber-400 border-l-2 border-amber-400 shadow-[inset_4px_0_10px_rgba(245,158,11,0.1)]" 
+                      : "text-slate-400 hover:bg-white/5 hover:text-slate-200 hover:translate-x-1"
                   )}
                   onClick={() => setIsOpen(false)}
                 >
@@ -86,19 +86,19 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
           </nav>
         </div>
         
-        <div className="p-4 border-t border-slate-200">
-          <div className="flex items-center gap-3 mb-4 px-2">
-            <div className="h-10 w-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden">
+        <div className="p-4 border-t border-white/5">
+          <div className="flex items-center gap-3 mb-4 px-2 hover-glow cursor-pointer transition-colors hover:bg-white/5 p-2 -mx-2 rounded-lg">
+            <div className="h-10 w-10 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center overflow-hidden">
               {profile?.avatar_url ? (
                 <img src={profile.avatar_url} alt="Avatar" className="h-full w-full object-cover" />
               ) : (
-                <span className="text-slate-600 font-medium">
+                <span className="text-slate-400 font-medium">
                   {profile?.full_name?.charAt(0) || profile?.email?.charAt(0) || 'U'}
                 </span>
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-slate-900 truncate">
+              <p className="text-sm font-medium text-slate-200 truncate">
                 {profile?.full_name || 'Admin User'}
               </p>
               <p className="text-xs text-amber-600 capitalize truncate">
@@ -108,7 +108,7 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
           </div>
           <button
             onClick={() => setShowLogoutModal(true)}
-            className="flex w-full items-center px-3 py-2.5 text-sm font-medium rounded-lg text-slate-600 hover:bg-red-50 hover:text-red-500 transition-colors"
+            className="flex w-full items-center px-3 py-2.5 text-sm font-medium rounded-lg text-slate-400 hover:bg-red-900/20 hover:text-red-400 transition-colors"
           >
             <LogOut className="mr-3 h-5 w-5" />
             Sign out
@@ -117,14 +117,14 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
       </div>
 
       {showLogoutModal && (
-        <div className="fixed inset-0 z-[100] bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 animate-in fade-in zoom-in-95 duration-200">
-            <h3 className="text-lg font-semibold text-slate-900 mb-2">Sign Out</h3>
-            <p className="text-slate-500 mb-6">Are you sure you want to sign out of your account?</p>
+        <div className="fixed inset-0 z-[100] bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="glass-card rounded-xl shadow-[0_0_40px_rgba(0,0,0,0.5)] border border-white/10 max-w-sm w-full p-6 animate-in fade-in zoom-in-95 duration-200">
+            <h3 className="text-lg font-semibold text-white mb-2">Sign Out</h3>
+            <p className="text-slate-400 mb-6">Are you sure you want to sign out of your account?</p>
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setShowLogoutModal(false)}
-                className="px-4 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 transition-colors"
+                className="px-4 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-white/10 transition-colors"
               >
                 Cancel
               </button>

@@ -48,22 +48,22 @@ export function DashboardPage() {
   ]
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold tracking-tight text-slate-900">Dashboard Overview</h2>
-        <p className="text-sm text-slate-500 mt-1">Welcome back! Here's what's happening with ShrineSolar today.</p>
+    <div className="space-y-6 animate-in fade-in duration-700">
+      <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <h2 className="text-3xl font-bold tracking-tight text-gradient">Dashboard Overview</h2>
+        <p className="text-sm text-slate-400 mt-1">Welcome back! Here's what's happening with ShrineSolar today.</p>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 lg:grid-cols-3">
-        {kpis.map((kpi) => (
-          <Card key={kpi.name} className="relative overflow-hidden group hover:border-amber-500/30 transition-colors h-32">
-            <div className="absolute top-2 right-4 opacity-10 group-hover:opacity-20 transition-opacity">
-              <kpi.icon className="h-16 w-16" />
+        {kpis.map((kpi, index) => (
+          <Card key={kpi.name} className="relative overflow-hidden group h-32 animate-in fade-in slide-in-from-bottom-4" style={{ animationDuration: `${500 + index * 150}ms` }}>
+            <div className="absolute top-2 right-4 opacity-10 group-hover:opacity-30 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 text-amber-500">
+              <kpi.icon className="h-20 w-20" />
             </div>
-            <CardContent className="p-6 h-full flex flex-col justify-between">
+            <CardContent className="p-6 h-full flex flex-col justify-between relative z-10">
               <div>
-                <p className="text-sm font-medium text-slate-500">{kpi.name}</p>
-                <p className="mt-1 text-3xl font-semibold text-slate-900">
+                <p className="text-sm font-medium text-slate-400 group-hover:text-amber-200 transition-colors">{kpi.name}</p>
+                <p className="mt-1 text-4xl font-bold text-white group-hover:text-amber-400 transition-colors">
                   {isLoading ? '...' : kpi.value}
                 </p>
               </div>
@@ -79,18 +79,20 @@ export function DashboardPage() {
           </CardHeader>
           <CardContent>
             {isLoading ? (
-              <div className="flex h-[250px] items-center justify-center text-slate-400">Loading...</div>
+              <div className="flex h-[250px] items-center justify-center text-slate-500">
+                <div className="animate-pulse-glow h-8 w-8 rounded-full bg-amber-500" />
+              </div>
             ) : recentOrders.length === 0 ? (
-              <div className="flex h-[250px] items-center justify-center text-slate-400 border border-dashed border-slate-200 rounded-lg">
+              <div className="flex h-[250px] items-center justify-center text-slate-500 border border-dashed border-white/10 rounded-lg">
                 No orders yet. Create your first order!
               </div>
             ) : (
               <div className="space-y-3">
                 {recentOrders.map((order: any) => (
-                  <div key={order.id} className="flex items-center justify-between p-3 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors">
+                  <div key={order.id} className="flex items-center justify-between p-3 rounded-lg glass-table-row bg-slate-900/50 border border-white/5">
                     <div>
-                      <p className="text-sm font-medium text-slate-900 font-mono">{order.order_number}</p>
-                      <p className="text-xs text-slate-500">
+                      <p className="text-sm font-medium text-white font-mono">{order.order_number}</p>
+                      <p className="text-xs text-slate-400">
                         {order.customers ? `${order.customers.first_name} ${order.customers.last_name}` : 'Unknown'}
                       </p>
                     </div>
@@ -107,18 +109,20 @@ export function DashboardPage() {
           </CardHeader>
           <CardContent>
             {isLoading ? (
-              <div className="flex h-[250px] items-center justify-center text-slate-400">Loading...</div>
+              <div className="flex h-[250px] items-center justify-center text-slate-500">
+                <div className="animate-pulse-glow h-8 w-8 rounded-full bg-blue-500" />
+              </div>
             ) : recentInstallations.length === 0 ? (
-              <div className="flex h-[250px] items-center justify-center text-slate-400 border border-dashed border-slate-200 rounded-lg">
+              <div className="flex h-[250px] items-center justify-center text-slate-500 border border-dashed border-white/10 rounded-lg">
                 No installations yet.
               </div>
             ) : (
               <div className="space-y-3">
                 {recentInstallations.map((inst: any) => (
-                  <div key={inst.id} className="flex items-center justify-between p-3 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors">
+                  <div key={inst.id} className="flex items-center justify-between p-3 rounded-lg glass-table-row bg-slate-900/50 border border-white/5">
                     <div>
-                      <p className="text-sm font-medium text-slate-900 font-mono">{inst.orders?.order_number || 'N/A'}</p>
-                      <p className="text-xs text-slate-500">
+                      <p className="text-sm font-medium text-white font-mono">{inst.orders?.order_number || 'N/A'}</p>
+                      <p className="text-xs text-slate-400">
                         {inst.orders?.customers ? `${inst.orders.customers.first_name} ${inst.orders.customers.last_name}` : 'Unknown'}
                       </p>
                     </div>

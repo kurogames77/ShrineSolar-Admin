@@ -95,10 +95,10 @@ export function Topbar({ onMenuClick }: TopbarProps) {
 
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-x-4 border-b border-slate-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-x-4 border-b border-white/5 bg-[#0a0e1a]/80 backdrop-blur-md px-4 sm:gap-x-6 sm:px-6 lg:px-8">
       <button
         type="button"
-        className="-m-2.5 p-2.5 text-slate-500 hover:text-slate-900 lg:hidden"
+        className="-m-2.5 p-2.5 text-slate-400 hover:text-white lg:hidden hover-glow"
         onClick={onMenuClick}
       >
         <span className="sr-only">Open sidebar</span>
@@ -106,7 +106,7 @@ export function Topbar({ onMenuClick }: TopbarProps) {
       </button>
 
       {/* Separator */}
-      <div className="h-6 w-px bg-slate-200 lg:hidden" aria-hidden="true" />
+      <div className="h-6 w-px bg-slate-800 lg:hidden" aria-hidden="true" />
 
       <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
         <div className="flex flex-1 items-center">
@@ -117,7 +117,7 @@ export function Topbar({ onMenuClick }: TopbarProps) {
             <button 
               type="button" 
               onClick={() => setShowNotifs(!showNotifs)}
-              className={`-m-2.5 p-2.5 transition-colors relative ${showNotifs ? 'text-amber-400' : 'text-slate-400 hover:text-amber-400'}`}
+              className={`-m-2.5 p-2.5 transition-colors relative hover-glow ${showNotifs ? 'text-amber-400' : 'text-slate-400 hover:text-amber-400'}`}
             >
               <span className="sr-only">View notifications</span>
               <Bell className="h-5 w-5" aria-hidden="true" />
@@ -129,9 +129,9 @@ export function Topbar({ onMenuClick }: TopbarProps) {
             {showNotifs && (
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setShowNotifs(false)} />
-                <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 rounded-xl bg-white border border-slate-200 shadow-2xl z-50 overflow-hidden animate-[fadeIn_0.15s_ease]">
-                  <div className="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
-                    <h3 className="font-semibold text-slate-900">Notifications</h3>
+                <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 rounded-xl glass-card border border-white/5 shadow-2xl z-50 overflow-hidden animate-[fadeIn_0.15s_ease]">
+                  <div className="p-4 border-b border-white/5 flex items-center justify-between bg-slate-900/50">
+                    <h3 className="font-semibold text-white">Notifications</h3>
                     {unreadCount > 0 && (
                       <button onClick={markAllAsRead} className="text-xs font-medium text-amber-600 hover:text-amber-500 transition-colors">
                         Mark all as read
@@ -140,20 +140,20 @@ export function Topbar({ onMenuClick }: TopbarProps) {
                   </div>
                   <div className="max-h-[350px] overflow-y-auto">
                     {notifications.length === 0 ? (
-                      <div className="p-8 text-center text-slate-500 text-sm">No notifications</div>
+                      <div className="p-8 text-center text-slate-400 text-sm">No notifications</div>
                     ) : (
-                      <div className="divide-y divide-slate-100">
+                      <div className="divide-y divide-white/5">
                         {notifications.map(n => (
-                          <div key={n.id} className={`p-4 transition-colors hover:bg-slate-50 ${!n.read ? 'bg-amber-50/50' : ''}`}>
+                          <div key={n.id} className={`p-4 transition-colors hover:bg-slate-800/50 ${!n.read ? 'bg-amber-900/10' : ''}`}>
                             <div className="flex gap-3">
-                              <div className={`mt-1.5 w-2 h-2 rounded-full shrink-0 ${!n.read ? 'bg-amber-400' : 'bg-transparent'}`} />
+                              <div className={`mt-1.5 w-2 h-2 rounded-full shrink-0 ${!n.read ? 'bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.8)]' : 'bg-transparent'}`} />
                               <div className="flex-1 min-w-0">
-                                <p className={`text-sm font-medium ${!n.read ? 'text-slate-900' : 'text-slate-600'}`}>{n.title}</p>
-                                <p className="text-xs text-slate-400 mt-1 line-clamp-2">{n.message}</p>
+                                <p className={`text-sm font-medium ${!n.read ? 'text-white' : 'text-slate-400'}`}>{n.title}</p>
+                                <p className="text-xs text-slate-500 mt-1 line-clamp-2">{n.message}</p>
                                 <p className="text-[10px] text-slate-500 mt-2 font-medium uppercase tracking-wider">{n.time}</p>
                               </div>
                               {!n.read && (
-                                <button onClick={() => markAsRead(n.id)} className="p-1.5 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition-colors self-start" title="Mark as read">
+                                <button onClick={() => markAsRead(n.id)} className="p-1.5 rounded-lg text-slate-500 hover:text-white hover:bg-slate-800 transition-colors self-start" title="Mark as read">
                                   <Check className="h-3.5 w-3.5" />
                                 </button>
                               )}
@@ -163,8 +163,8 @@ export function Topbar({ onMenuClick }: TopbarProps) {
                       </div>
                     )}
                   </div>
-                  <div className="p-2 border-t border-slate-200 bg-slate-50">
-                    <button className="w-full py-2 text-xs font-medium text-slate-500 hover:text-slate-900 transition-colors" onClick={() => setShowNotifs(false)}>
+                  <div className="p-2 border-t border-white/5 bg-slate-900/50">
+                    <button className="w-full py-2 text-xs font-medium text-slate-400 hover:text-white transition-colors" onClick={() => setShowNotifs(false)}>
                       View all notifications
                     </button>
                   </div>

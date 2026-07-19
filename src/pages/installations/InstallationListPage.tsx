@@ -219,7 +219,7 @@ export function InstallationListPage() {
               <input className="h-9 w-full rounded-lg bg-white border border-slate-300 pl-9 pr-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors" placeholder="Search by order # or customer..." value={search} onChange={(e) => { setSearch(e.target.value); setPage(1) }} />
             </div>
           </div>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto mobile-scroll">
             <table className="w-full text-sm whitespace-nowrap">
               <thead>
                 <tr className="border-b border-slate-200">

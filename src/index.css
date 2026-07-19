@@ -73,8 +73,18 @@
     transform: translateY(-4px);
   }
 
+  .glass-panel {
+    @apply bg-white/50 backdrop-blur-sm border-b border-white/20 dark:bg-slate-900/50 dark:border-slate-800;
+    -webkit-backdrop-filter: blur(4px);
+  }
+
   .glass-table-row {
-    transition: all 0.2s ease;
+    @apply hover:bg-white/40 transition-colors dark:hover:bg-slate-800/50;
+  }
+  
+  /* Smooth momentum scrolling on iOS for tables */
+  .mobile-scroll {
+    -webkit-overflow-scrolling: touch;
   }
   
   .dark .glass-table-row:hover {

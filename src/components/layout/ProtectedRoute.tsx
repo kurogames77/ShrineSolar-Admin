@@ -9,7 +9,7 @@ export function ProtectedRoute({ children, requireSuperAdmin = false }: { childr
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#0a0e1a] flex items-center justify-center">
+      <div className="min-h-[100dvh] bg-[#0a0e1a] flex items-center justify-center">
         <Spinner size="xl" />
       </div>
     )

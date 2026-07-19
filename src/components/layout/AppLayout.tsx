@@ -7,10 +7,10 @@ export function AppLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
-    <div className="flex h-screen bg-slate-50 overflow-hidden text-slate-900 relative dark:bg-[#0a0e1a] dark:text-slate-200 transition-colors duration-300">
+    <div className="flex h-screen bg-slate-50 overflow-hidden text-slate-900 relative dark:bg-[#0a0e1a] dark:text-slate-200">
       {/* Background decorations for solar feel */}
-      <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-amber-500/0 rounded-full blur-[120px] pointer-events-none transition-colors duration-500 dark:animate-pulse-glow dark:bg-amber-500/10" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-blue-600/0 rounded-full blur-[120px] pointer-events-none transition-colors duration-500 dark:animate-pulse-glow dark:bg-blue-600/10" style={{ animationDelay: '2s' }} />
+      <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-amber-500/0 rounded-full blur-[120px] pointer-events-none dark:animate-pulse-glow dark:bg-amber-500/10" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-blue-600/0 rounded-full blur-[120px] pointer-events-none dark:animate-pulse-glow dark:bg-blue-600/10" style={{ animationDelay: '2s' }} />
 
       <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
       

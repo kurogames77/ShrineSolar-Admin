@@ -50,8 +50,8 @@ export function DashboardPage() {
   return (
     <div className="space-y-6 animate-in fade-in duration-700">
       <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-gradient transition-colors">Dashboard Overview</h2>
-        <p className="text-sm text-slate-500 mt-1 transition-colors dark:text-slate-400">Welcome back! Here's what's happening with ShrineSolar today.</p>
+        <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-gradient">Dashboard Overview</h2>
+        <p className="text-sm text-slate-500 mt-1 dark:text-slate-400">Welcome back! Here's what's happening with ShrineSolar today.</p>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 lg:grid-cols-3">
@@ -89,10 +89,10 @@ export function DashboardPage() {
             ) : (
               <div className="space-y-3">
                 {recentOrders.map((order: any) => (
-                  <div key={order.id} className="flex items-center justify-between p-3 rounded-lg bg-slate-50 border border-slate-100 transition-colors dark:glass-table-row dark:bg-slate-900/50 dark:border-white/5">
+                  <div key={order.id} className="flex items-center justify-between p-3 rounded-lg bg-slate-50 border border-slate-100 dark:glass-table-row dark:bg-slate-900/50 dark:border-white/5">
                     <div>
-                      <p className="text-sm font-medium text-slate-900 font-mono transition-colors dark:text-white">{order.order_number}</p>
-                      <p className="text-xs text-slate-500 transition-colors dark:text-slate-400">
+                      <p className="text-sm font-medium text-slate-900 font-mono dark:text-white">{order.order_number}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
                         {order.customers ? `${order.customers.first_name} ${order.customers.last_name}` : 'Unknown'}
                       </p>
                     </div>
@@ -119,10 +119,10 @@ export function DashboardPage() {
             ) : (
               <div className="space-y-3">
                 {recentInstallations.map((inst: any) => (
-                  <div key={inst.id} className="flex items-center justify-between p-3 rounded-lg bg-slate-50 border border-slate-100 transition-colors dark:glass-table-row dark:bg-slate-900/50 dark:border-white/5">
+                  <div key={inst.id} className="flex items-center justify-between p-3 rounded-lg bg-slate-50 border border-slate-100 dark:glass-table-row dark:bg-slate-900/50 dark:border-white/5">
                     <div>
-                      <p className="text-sm font-medium text-slate-900 font-mono transition-colors dark:text-white">{inst.orders?.order_number || 'N/A'}</p>
-                      <p className="text-xs text-slate-500 transition-colors dark:text-slate-400">
+                      <p className="text-sm font-medium text-slate-900 font-mono dark:text-white">{inst.orders?.order_number || 'N/A'}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
                         {inst.orders?.customers ? `${inst.orders.customers.first_name} ${inst.orders.customers.last_name}` : 'Unknown'}
                       </p>
                     </div>

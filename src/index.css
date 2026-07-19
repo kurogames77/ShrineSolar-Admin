@@ -28,7 +28,6 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
-    transition: background-color 0.3s ease, color 0.3s ease;
   }
 
   .dark body {
@@ -99,7 +98,6 @@
 
   .dark-invert {
     filter: invert(0);
-    transition: filter 0.3s ease;
   }
   .dark .dark-invert {
     /* Using brightness and invert to turn black into white in dark mode */

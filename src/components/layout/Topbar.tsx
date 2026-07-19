@@ -97,7 +97,7 @@ export function Topbar({ onMenuClick }: TopbarProps) {
 
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-x-4 border-b border-slate-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8 dark:border-white/5 dark:bg-[#0a0e1a]/80 dark:backdrop-blur-md transition-colors duration-300">
+    <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-x-4 border-b border-slate-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8 dark:border-white/5 dark:bg-[#0a0e1a]/80 dark:backdrop-blur-md">
       <button
         type="button"
         className="-m-2.5 p-2.5 text-slate-500 hover:text-slate-900 lg:hidden dark:text-slate-400 dark:hover:text-white dark:hover-glow transition-colors"

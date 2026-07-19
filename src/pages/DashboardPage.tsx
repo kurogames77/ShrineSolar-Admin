@@ -50,8 +50,8 @@ export function DashboardPage() {
   return (
     <div className="space-y-6 animate-in fade-in duration-700">
       <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-gradient">Dashboard Overview</h2>
-        <p className="text-sm text-slate-500 mt-1 dark:text-slate-400">Welcome back! Here's what's happening with ShrineSolar today.</p>
+        <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Dashboard Overview</h2>
+        <p className="text-sm text-slate-500 mt-1 dark:text-slate-300">Welcome back! Here's what's happening with ShrineSolar today.</p>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 lg:grid-cols-3">

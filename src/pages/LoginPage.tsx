@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router'
-import { Lock, User, ArrowRight, Eye, EyeOff } from 'lucide-react'
+import { Lock, User, ArrowRight, Eye, EyeOff, AlertCircle } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
@@ -12,11 +12,35 @@ export function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  
+  // CAPTCHA State
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
+  const [captchaError, setCaptchaError] = useState(false)
+
+  useEffect(() => {
+    // Expose a global callback for the Turnstile widget
+    ;(window as any).onTurnstileSuccess = (token: string) => {
+      setTurnstileToken(token)
+      setCaptchaError(false)
+    }
+
+    return () => {
+      delete (window as any).onTurnstileSuccess
+    }
+  }, [])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
     setError(null)
+    setCaptchaError(false)
+
+    // Ensure CAPTCHA was completed
+    if (!turnstileToken) {
+      setCaptchaError(true)
+      setIsLoading(false)
+      return
+    }
 
     try {
       const { error } = await supabase.auth.signInWithPassword({
@@ -50,7 +74,7 @@ export function LoginPage() {
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md relative z-10">
-        <div className="glass-card py-8 px-4 sm:rounded-2xl sm:px-10">
+        <div className="glass-card py-8 px-4 sm:rounded-2xl sm:px-10 border border-white/10 shadow-[0_0_40px_rgba(0,0,0,0.5)]">
           <form className="space-y-6" onSubmit={handleLogin}>
             {error && (
               <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg text-sm flex items-center">
@@ -101,17 +125,33 @@ export function LoginPage() {
             </div>
 
             <div className="flex items-center">
-              <div className="flex items-center">
+              <div className="flex items-center group cursor-pointer">
                 <input
                   id="remember-me"
                   name="remember-me"
                   type="checkbox"
-                  className="h-4 w-4 rounded bg-slate-900 border-slate-700 text-amber-500 focus:ring-amber-500 focus:ring-offset-[#0a0e1a]"
+                  className="h-4 w-4 rounded bg-slate-900/50 border-slate-600 text-amber-500 focus:ring-amber-500 focus:ring-offset-[#0a0e1a] cursor-pointer"
                 />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-slate-700 font-medium">
+                <label htmlFor="remember-me" className="ml-2 block text-sm text-slate-400 font-medium group-hover:text-slate-200 transition-colors cursor-pointer">
                   Remember me
                 </label>
               </div>
+            </div>
+
+            {/* Cloudflare Turnstile Widget */}
+            <div className="flex flex-col items-center justify-center pt-2">
+              <div 
+                className="cf-turnstile" 
+                data-sitekey="1x00000000000000000000AA" 
+                data-callback="onTurnstileSuccess"
+                data-theme="dark"
+              ></div>
+              {captchaError && (
+                <p className="text-red-400 text-xs mt-2 flex items-center">
+                  <AlertCircle className="w-3 h-3 mr-1" />
+                  Please complete the CAPTCHA verification
+                </p>
+              )}
             </div>
 
             <div>

@@ -19,8 +19,7 @@ export function LoginPage() {
   const turnstileRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    // Expose a global callback for the Turnstile widget
-    ;(window as any).onTurnstileSuccess = (token: string) => {
+    const handleTurnstileSuccess = (token: string) => {
       setTurnstileToken(token)
       setCaptchaError(false)
     }
@@ -30,7 +29,7 @@ export function LoginPage() {
         // Render explicitly
         (window as any).turnstile.render(turnstileRef.current, {
           sitekey: '0x4AAAAAAD5TN93fLM-OyEjz',
-          callback: 'onTurnstileSuccess',
+          callback: handleTurnstileSuccess,
           theme: 'dark'
         })
       }
@@ -53,12 +52,7 @@ export function LoginPage() {
       
       return () => {
         clearInterval(interval)
-        delete (window as any).onTurnstileSuccess
       }
-    }
-
-    return () => {
-      delete (window as any).onTurnstileSuccess
     }
   }, [])
 

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router'
 import { Lock, User, ArrowRight, Eye, EyeOff, AlertCircle } from 'lucide-react'
 import { supabase } from '../lib/supabase'
@@ -16,12 +16,45 @@ export function LoginPage() {
   // CAPTCHA State
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
   const [captchaError, setCaptchaError] = useState(false)
+  const turnstileRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     // Expose a global callback for the Turnstile widget
     ;(window as any).onTurnstileSuccess = (token: string) => {
       setTurnstileToken(token)
       setCaptchaError(false)
+    }
+
+    const renderWidget = () => {
+      if ((window as any).turnstile && turnstileRef.current) {
+        // Render explicitly
+        (window as any).turnstile.render(turnstileRef.current, {
+          sitekey: '0x4AAAAAAD5TN93fLM-OyEjz',
+          callback: 'onTurnstileSuccess',
+          theme: 'dark'
+        })
+      }
+    }
+
+    // If Turnstile is already loaded, render it
+    if ((window as any).turnstile) {
+      renderWidget()
+    } else {
+      // If not, wait for it to load
+      let attempts = 0
+      const interval = setInterval(() => {
+        if ((window as any).turnstile) {
+          clearInterval(interval)
+          renderWidget()
+        }
+        attempts++
+        if (attempts > 50) clearInterval(interval) // Stop checking after 5 seconds
+      }, 100)
+      
+      return () => {
+        clearInterval(interval)
+        delete (window as any).onTurnstileSuccess
+      }
     }
 
     return () => {
@@ -46,6 +79,9 @@ export function LoginPage() {
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
+        options: {
+          captchaToken: turnstileToken,
+        },
       })
 
       if (error) throw error
@@ -151,12 +187,7 @@ export function LoginPage() {
 
             {/* Cloudflare Turnstile Widget */}
             <div className="flex flex-col items-center justify-center pt-2">
-              <div 
-                className="cf-turnstile" 
-                data-sitekey="0x4AAAAAAD5TN93fLM-OyEjz" 
-                data-callback="onTurnstileSuccess"
-                data-theme="dark"
-              ></div>
+              <div ref={turnstileRef}></div>
               {captchaError && (
                 <p className="text-red-400 text-xs mt-2 flex items-center">
                   <AlertCircle className="w-3 h-3 mr-1" />

@@ -17,6 +17,7 @@ export function LoginPage() {
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
   const [captchaError, setCaptchaError] = useState(false)
   const turnstileRef = useRef<HTMLDivElement>(null)
+  const widgetIdRef = useRef<string | null>(null)
 
   useEffect(() => {
     const handleTurnstileSuccess = (token: string) => {
@@ -24,10 +25,12 @@ export function LoginPage() {
       setCaptchaError(false)
     }
 
+    let interval: any
+
     const renderWidget = () => {
-      if ((window as any).turnstile && turnstileRef.current) {
+      if ((window as any).turnstile && turnstileRef.current && !widgetIdRef.current) {
         // Render explicitly
-        (window as any).turnstile.render(turnstileRef.current, {
+        widgetIdRef.current = (window as any).turnstile.render(turnstileRef.current, {
           sitekey: '0x4AAAAAAD5TN93fLM-OyEjz',
           callback: handleTurnstileSuccess,
           theme: 'dark'
@@ -41,7 +44,7 @@ export function LoginPage() {
     } else {
       // If not, wait for it to load
       let attempts = 0
-      const interval = setInterval(() => {
+      interval = setInterval(() => {
         if ((window as any).turnstile) {
           clearInterval(interval)
           renderWidget()
@@ -49,9 +52,13 @@ export function LoginPage() {
         attempts++
         if (attempts > 50) clearInterval(interval) // Stop checking after 5 seconds
       }, 100)
-      
-      return () => {
-        clearInterval(interval)
+    }
+
+    return () => {
+      if (interval) clearInterval(interval)
+      if (widgetIdRef.current && (window as any).turnstile) {
+        (window as any).turnstile.remove(widgetIdRef.current)
+        widgetIdRef.current = null
       }
     }
   }, [])
@@ -83,6 +90,11 @@ export function LoginPage() {
       navigate('/')
     } catch (err: any) {
       setError(err.message || 'Failed to sign in')
+      // Reset the CAPTCHA for a new attempt
+      setTurnstileToken(null)
+      if (widgetIdRef.current && (window as any).turnstile) {
+        (window as any).turnstile.reset(widgetIdRef.current)
+      }
     } finally {
       setIsLoading(false)
     }

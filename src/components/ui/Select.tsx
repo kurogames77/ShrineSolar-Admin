@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { cn } from './Button'
 import { ChevronDown } from 'lucide-react'
 
@@ -21,10 +22,15 @@ export interface SelectProps {
 export function Select({ value, onChange, options, placeholder = 'Select...', disabled, className, name, required }: SelectProps) {
   const [isOpen, setIsOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+  const [position, setPosition] = useState({ top: 0, left: 0, width: 0 })
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+      const isOutsideContainer = containerRef.current && !containerRef.current.contains(event.target as Node)
+      const isOutsideDropdown = dropdownRef.current ? !dropdownRef.current.contains(event.target as Node) : true
+      
+      if (isOutsideContainer && isOutsideDropdown) {
         setIsOpen(false)
       }
     }
@@ -32,11 +38,79 @@ export function Select({ value, onChange, options, placeholder = 'Select...', di
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
+  useEffect(() => {
+    if (isOpen && containerRef.current) {
+      const updatePosition = () => {
+        if (containerRef.current) {
+          const rect = containerRef.current.getBoundingClientRect()
+          setPosition({
+            top: rect.bottom + 4,
+            left: rect.left,
+            width: rect.width,
+          })
+        }
+      }
+      
+      updatePosition()
+      
+      const handleScroll = (e: Event) => {
+        // Ignore scroll events originating from inside the dropdown itself
+        if (dropdownRef.current && dropdownRef.current.contains(e.target as Node)) {
+          return
+        }
+        setIsOpen(false)
+      }
+      
+      window.addEventListener('scroll', handleScroll, true)
+      window.addEventListener('resize', handleScroll)
+      
+      return () => {
+        window.removeEventListener('scroll', handleScroll, true)
+        window.removeEventListener('resize', handleScroll)
+      }
+    }
+  }, [isOpen])
+
   const selectedOption = options.find(o => o.value === value)
+
+  const dropdownMenu = isOpen && !disabled && (
+    <div 
+      ref={dropdownRef}
+      style={{
+        position: 'fixed',
+        top: `${position.top}px`,
+        left: `${position.left}px`,
+        width: `${position.width}px`,
+        zIndex: 9999
+      }}
+      className="rounded-md bg-white py-1 text-sm shadow-lg ring-1 ring-black ring-opacity-5 max-h-48 overflow-auto animate-[fadeIn_0.1s_ease-out]"
+    >
+      {options.length === 0 ? (
+        <div className="relative cursor-default select-none py-2 px-3 text-slate-500">
+          No options available
+        </div>
+      ) : (
+        options.map((option) => (
+          <div
+            key={option.value}
+            className={cn(
+              'relative cursor-pointer select-none py-2 pl-3 pr-9 hover:bg-amber-50 hover:text-amber-900 transition-colors',
+              value === option.value ? 'bg-amber-50 text-amber-900 font-medium' : 'text-slate-900'
+            )}
+            onClick={() => {
+              onChange(option.value)
+              setIsOpen(false)
+            }}
+          >
+            {option.label}
+          </div>
+        ))
+      )}
+    </div>
+  )
 
   return (
     <div ref={containerRef} className="relative w-full">
-      {/* Hidden input for native form submission if needed */}
       <input type="hidden" name={name} value={value} required={required} />
       
       <button
@@ -56,31 +130,9 @@ export function Select({ value, onChange, options, placeholder = 'Select...', di
         <ChevronDown className="h-4 w-4 opacity-50 ml-2 shrink-0" />
       </button>
 
-      {isOpen && !disabled && (
-        <div className="absolute z-[100] mt-1 w-full rounded-md bg-white py-1 text-sm shadow-lg ring-1 ring-black ring-opacity-5 max-h-48 overflow-auto animate-[fadeIn_0.1s_ease-out]">
-          {options.length === 0 ? (
-            <div className="relative cursor-default select-none py-2 px-3 text-slate-500">
-              No options available
-            </div>
-          ) : (
-            options.map((option) => (
-              <div
-                key={option.value}
-                className={cn(
-                  'relative cursor-pointer select-none py-2 pl-3 pr-9 hover:bg-amber-50 hover:text-amber-900 transition-colors',
-                  value === option.value ? 'bg-amber-50 text-amber-900 font-medium' : 'text-slate-900'
-                )}
-                onClick={() => {
-                  onChange(option.value)
-                  setIsOpen(false)
-                }}
-              >
-                {option.label}
-              </div>
-            ))
-          )}
-        </div>
-      )}
+      {dropdownMenu && typeof document !== 'undefined'
+        ? createPortal(dropdownMenu, document.body)
+        : null}
     </div>
   )
 }

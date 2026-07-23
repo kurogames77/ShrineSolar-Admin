@@ -4,6 +4,7 @@ import zamboangaData from '../../data/zamboanga.json'
 import { Card, CardContent } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
+import { Select } from '../../components/ui/Select'
 import { cn } from '../../components/ui/Button'
 import { usePermissions } from '../../hooks/usePermissions'
 import { useActivity } from '../../contexts/ActivityContext'
@@ -379,55 +380,35 @@ export function CustomerListPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div className="w-full space-y-1.5">
                   <label className="text-sm font-medium text-slate-700">Barangay <span className="text-red-500">*</span></label>
-                  <div className="relative">
-                    <select 
-                      name="barangay" 
-                      className={cn(
-                        'flex h-10 w-full rounded-lg bg-white border border-slate-300 px-3 py-2 text-sm text-slate-900',
-                        'focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors shadow-sm',
-                        'disabled:cursor-not-allowed disabled:opacity-50'
-                      )}
-                      value={selectedBarangayName}
-                      onChange={(e) => setSelectedBarangayName(e.target.value)}
-                      disabled={!selectedCityCode}
-                      required
-                    >
-                      <option value="" disabled>Select Barangay</option>
-                      {selectedBarangayName && !barangays.find(b => b.name === selectedBarangayName) && (
-                        <option value={selectedBarangayName}>{selectedBarangayName}</option>
-                      )}
-                      {barangays.map(b => (
-                        <option key={b.code} value={b.name}>{b.name}</option>
-                      ))}
-                    </select>
-                  </div>
+                  <Select
+                    name="barangay"
+                    value={selectedBarangayName}
+                    onChange={(val) => setSelectedBarangayName(val)}
+                    options={[
+                      ...(selectedBarangayName && !barangays.find(b => b.name === selectedBarangayName) ? [{ value: selectedBarangayName, label: selectedBarangayName }] : []),
+                      ...barangays.map(b => ({ value: b.name, label: b.name }))
+                    ]}
+                    placeholder="Select Barangay"
+                    disabled={!selectedCityCode}
+                    required
+                  />
                 </div>
 
                 <div className="w-full space-y-1.5">
                   <label className="text-sm font-medium text-slate-700">City / Municipality <span className="text-red-500">*</span></label>
-                  <div className="relative">
-                    <select 
-                      name="city" 
-                      className={cn(
-                        'flex h-10 w-full rounded-lg bg-white border border-slate-300 px-3 py-2 text-sm text-slate-900',
-                        'focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors shadow-sm'
-                      )}
-                      value={selectedCityName}
-                      onChange={(e) => {
-                        const val = e.target.value
-                        setSelectedCityName(val)
-                        setSelectedBarangayName('')
-                        const city = cities.find(c => c.name === val)
-                        setSelectedCityCode(city ? city.code : '')
-                      }}
-                      required
-                    >
-                      <option value="" disabled>Select City</option>
-                      {cities.map(c => (
-                        <option key={c.code} value={c.name}>{c.name}</option>
-                      ))}
-                    </select>
-                  </div>
+                  <Select
+                    name="city"
+                    value={selectedCityName}
+                    onChange={(val) => {
+                      setSelectedCityName(val)
+                      setSelectedBarangayName('')
+                      const city = cities.find(c => c.name === val)
+                      setSelectedCityCode(city ? city.code : '')
+                    }}
+                    options={cities.map(c => ({ value: c.name, label: c.name }))}
+                    placeholder="Select City"
+                    required
+                  />
                 </div>
               </div>
               

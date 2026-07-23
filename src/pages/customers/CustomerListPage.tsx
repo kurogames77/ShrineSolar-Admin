@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
+import zamboangaData from '../../data/zamboanga.json'
 import { Card, CardContent } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
@@ -37,12 +38,14 @@ export function CustomerListPage() {
   const [customerToDelete, setCustomerToDelete] = useState<string | null>(null)
   const [errorPopup, setErrorPopup] = useState<string | null>(null)
   
-  const [cities, setCities] = useState<any[]>([])
-  const [barangays, setBarangays] = useState<any[]>([])
   const [selectedCityCode, setSelectedCityCode] = useState<string>('')
   const [selectedCityName, setSelectedCityName] = useState<string>('')
   const [selectedBarangayName, setSelectedBarangayName] = useState<string>('')
-  const [isLoadingLocations, setIsLoadingLocations] = useState(false)
+  
+  const cities = zamboangaData.cities.sort((a, b) => a.name.localeCompare(b.name))
+  const barangays = selectedCityCode && (zamboangaData.barangays as any)[selectedCityCode]
+    ? [...(zamboangaData.barangays as any)[selectedCityCode]].sort((a: any, b: any) => a.name.localeCompare(b.name))
+    : []
   
   const perPage = 10
 
@@ -74,29 +77,7 @@ export function CustomerListPage() {
     fetchCustomers()
   }, [])
 
-  useEffect(() => {
-    fetch('https://psgc.gitlab.io/api/provinces/097200000/cities-municipalities/')
-      .then(res => res.json())
-      .then(data => {
-        setCities(data.sort((a: any, b: any) => a.name.localeCompare(b.name)))
-      })
-      .catch(err => console.error('Error fetching cities:', err))
-  }, [])
 
-  useEffect(() => {
-    if (!selectedCityCode) {
-      setBarangays([])
-      return
-    }
-    setIsLoadingLocations(true)
-    fetch(`https://psgc.gitlab.io/api/cities-municipalities/${selectedCityCode}/barangays/`)
-      .then(res => res.json())
-      .then(data => {
-        setBarangays(data.sort((a: any, b: any) => a.name.localeCompare(b.name)))
-      })
-      .catch(err => console.error('Error fetching barangays:', err))
-      .finally(() => setIsLoadingLocations(false))
-  }, [selectedCityCode])
 
   useEffect(() => {
     if (showModal) {
@@ -408,10 +389,10 @@ export function CustomerListPage() {
                       )}
                       value={selectedBarangayName}
                       onChange={(e) => setSelectedBarangayName(e.target.value)}
-                      disabled={!selectedCityCode || isLoadingLocations}
+                      disabled={!selectedCityCode}
                       required
                     >
-                      <option value="" disabled>{isLoadingLocations ? 'Loading...' : 'Select Barangay'}</option>
+                      <option value="" disabled>Select Barangay</option>
                       {selectedBarangayName && !barangays.find(b => b.name === selectedBarangayName) && (
                         <option value={selectedBarangayName}>{selectedBarangayName}</option>
                       )}

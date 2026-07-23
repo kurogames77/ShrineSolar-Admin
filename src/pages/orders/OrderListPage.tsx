@@ -343,7 +343,7 @@ export function OrderListPage() {
                     <tr key={o.id} className="border-b border-slate-200 hover:bg-slate-50 transition-colors">
                       <td className="py-3 px-4 font-mono text-amber-600 font-medium">{o.order_number}</td>
                       <td className="py-3 px-4 text-slate-900 dark:text-white font-medium">{o.customer_name}</td>
-                      <td className="py-3 px-4 text-slate-600 dark:text-slate-300">{o.product_details}</td>
+                      <td className="py-3 px-4 text-slate-600 dark:text-slate-300 whitespace-normal max-w-[300px] leading-relaxed">{o.product_details}</td>
                       <td className="py-3 px-4 text-slate-600 dark:text-slate-300">
                         {o.size_or_qty} {o.product_details.startsWith('Battery') ? 'kWh' : o.product_details.startsWith('Accessory') ? 'pcs' : 'kW'}
                       </td>

@@ -113,11 +113,11 @@ export function Topbar({ onMenuClick }: TopbarProps) {
       <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
         <div className="flex flex-1 items-center">
         </div>
-        <div className="flex items-center gap-x-4 lg:gap-x-6">
+        <div className="flex items-center gap-x-2 lg:gap-x-3">
           <button
             type="button"
             onClick={toggleTheme}
-            className="-m-2.5 p-2.5 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-amber-400 dark:hover-glow transition-colors"
+            className="flex items-center justify-center h-9 w-9 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-amber-400 dark:hover:bg-slate-800 dark:hover-glow transition-colors"
           >
             <span className="sr-only">Toggle theme</span>
             {theme === 'dark' ? (
@@ -131,12 +131,12 @@ export function Topbar({ onMenuClick }: TopbarProps) {
             <button 
               type="button" 
               onClick={() => setShowNotifs(!showNotifs)}
-              className={`-m-2.5 p-2.5 transition-colors relative dark:hover-glow ${showNotifs ? 'text-amber-500 dark:text-amber-400' : 'text-slate-500 hover:text-amber-500 dark:text-slate-400 dark:hover:text-amber-400'}`}
+              className={`flex items-center justify-center h-9 w-9 rounded-lg transition-colors dark:hover-glow ${showNotifs ? 'text-amber-500 bg-amber-50 dark:text-amber-400 dark:bg-amber-900/20' : 'text-slate-500 hover:text-amber-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-amber-400 dark:hover:bg-slate-800'}`}
             >
               <span className="sr-only">View notifications</span>
               <Bell className="h-5 w-5" aria-hidden="true" />
               {unreadCount > 0 && (
-                <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-orange-500 ring-2 ring-white dark:ring-[#0a0e1a]" />
+                <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-orange-500 ring-2 ring-white dark:ring-[#0a0e1a]" />
               )}
             </button>
             

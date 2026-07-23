@@ -35,6 +35,7 @@ export function CustomerListPage() {
   const [showModal, setShowModal] = useState(false)
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null)
   const [customerToDelete, setCustomerToDelete] = useState<string | null>(null)
+  const [errorPopup, setErrorPopup] = useState<string | null>(null)
   const perPage = 10
 
   const fetchCustomers = async () => {
@@ -109,7 +110,7 @@ export function CustomerListPage() {
     
     if (error) {
       console.error('Error deleting customer:', error)
-      alert('Error deleting customer: ' + error.message)
+      setErrorPopup('Error deleting customer: ' + error.message)
       setCustomerToDelete(null)
       return
     }
@@ -150,7 +151,7 @@ export function CustomerListPage() {
         setEditingCustomer(null)
       } else {
         console.error(error)
-        alert('Error updating customer: ' + error.message)
+        setErrorPopup('Error updating customer: ' + error.message)
       }
     } else {
       const { error } = await supabase
@@ -164,7 +165,7 @@ export function CustomerListPage() {
         setEditingCustomer(null)
       } else {
         console.error(error)
-        alert('Error adding customer: ' + error.message)
+        setErrorPopup('Error adding customer: ' + (error.message === 'duplicate key value violates unique constraint "customers_email_key"' ? 'Email address already exists.' : error.message))
       }
     }
   }
@@ -350,6 +351,22 @@ export function CustomerListPage() {
             <div className="flex gap-3 justify-end">
               <Button type="button" variant="ghost" onClick={() => setCustomerToDelete(null)}>Cancel</Button>
               <Button type="button" className="bg-red-500 hover:bg-red-600 text-white shadow-red-500/20" onClick={confirmDelete}>Delete</Button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Error Popup Modal */}
+      {errorPopup && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setErrorPopup(null)} />
+          <div className="relative glass-card rounded-2xl p-6 w-full max-w-sm animate-[fadeIn_0.2s_ease]">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-red-500">Error</h3>
+              <button onClick={() => setErrorPopup(null)} className="p-1 rounded-lg text-slate-500 hover:text-slate-900 dark:text-white hover:bg-white/5"><X className="h-5 w-5" /></button>
+            </div>
+            <p className="text-sm text-slate-600 dark:text-slate-300 mb-6">{errorPopup}</p>
+            <div className="flex justify-end">
+              <Button type="button" onClick={() => setErrorPopup(null)}>OK</Button>
             </div>
           </div>
         </div>

@@ -36,6 +36,14 @@ export function CustomerListPage() {
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null)
   const [customerToDelete, setCustomerToDelete] = useState<string | null>(null)
   const [errorPopup, setErrorPopup] = useState<string | null>(null)
+  
+  const [cities, setCities] = useState<any[]>([])
+  const [barangays, setBarangays] = useState<any[]>([])
+  const [selectedCityCode, setSelectedCityCode] = useState<string>('')
+  const [selectedCityName, setSelectedCityName] = useState<string>('')
+  const [selectedBarangayName, setSelectedBarangayName] = useState<string>('')
+  const [isLoadingLocations, setIsLoadingLocations] = useState(false)
+  
   const perPage = 10
 
   const fetchCustomers = async () => {
@@ -65,6 +73,53 @@ export function CustomerListPage() {
   useEffect(() => {
     fetchCustomers()
   }, [])
+
+  useEffect(() => {
+    fetch('https://psgc.gitlab.io/api/provinces/097200000/cities-municipalities/')
+      .then(res => res.json())
+      .then(data => {
+        setCities(data.sort((a: any, b: any) => a.name.localeCompare(b.name)))
+      })
+      .catch(err => console.error('Error fetching cities:', err))
+  }, [])
+
+  useEffect(() => {
+    if (!selectedCityCode) {
+      setBarangays([])
+      return
+    }
+    setIsLoadingLocations(true)
+    fetch(`https://psgc.gitlab.io/api/cities-municipalities/${selectedCityCode}/barangays/`)
+      .then(res => res.json())
+      .then(data => {
+        setBarangays(data.sort((a: any, b: any) => a.name.localeCompare(b.name)))
+      })
+      .catch(err => console.error('Error fetching barangays:', err))
+      .finally(() => setIsLoadingLocations(false))
+  }, [selectedCityCode])
+
+  useEffect(() => {
+    if (showModal) {
+      if (editingCustomer && editingCustomer.address) {
+        const parts = editingCustomer.address.split(', ')
+        const b = parts.length > 1 ? parts[0] : ''
+        const c = parts.length > 1 ? parts[1] : parts[0]
+        setSelectedCityName(c || '')
+        setSelectedBarangayName(b || '')
+        
+        const matchedCity = cities.find(city => city.name.toLowerCase() === c?.toLowerCase() || city.name.toLowerCase().includes(c?.toLowerCase()))
+        if (matchedCity) {
+          setSelectedCityCode(matchedCity.code)
+        } else {
+          setSelectedCityCode('')
+        }
+      } else {
+        setSelectedCityName('')
+        setSelectedBarangayName('')
+        setSelectedCityCode('')
+      }
+    }
+  }, [showModal, editingCustomer, cities])
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase()
@@ -341,8 +396,58 @@ export function CustomerListPage() {
               <Input label="Email" name="email" type="email" defaultValue={editingCustomer?.email} placeholder="username@gmail.com" required />
               <Input label="Phone" name="phone" defaultValue={editingCustomer?.phone} />
               <div className="grid grid-cols-2 gap-3">
-                <Input label="Barangay" name="barangay" defaultValue={editingCustomer?.address?.split(', ')[0] || ''} />
-                <Input label="City" name="city" defaultValue={editingCustomer?.address?.split(', ')[1] || (editingCustomer?.address && !editingCustomer?.address?.includes(', ') ? editingCustomer?.address : '')} />
+                <div className="w-full space-y-1.5">
+                  <label className="text-sm font-medium text-slate-700">Barangay <span className="text-red-500">*</span></label>
+                  <div className="relative">
+                    <select 
+                      name="barangay" 
+                      className={cn(
+                        'flex h-10 w-full rounded-lg bg-white border border-slate-300 px-3 py-2 text-sm text-slate-900',
+                        'focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors shadow-sm',
+                        'disabled:cursor-not-allowed disabled:opacity-50'
+                      )}
+                      value={selectedBarangayName}
+                      onChange={(e) => setSelectedBarangayName(e.target.value)}
+                      disabled={!selectedCityCode || isLoadingLocations}
+                      required
+                    >
+                      <option value="" disabled>{isLoadingLocations ? 'Loading...' : 'Select Barangay'}</option>
+                      {selectedBarangayName && !barangays.find(b => b.name === selectedBarangayName) && (
+                        <option value={selectedBarangayName}>{selectedBarangayName}</option>
+                      )}
+                      {barangays.map(b => (
+                        <option key={b.code} value={b.name}>{b.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="w-full space-y-1.5">
+                  <label className="text-sm font-medium text-slate-700">City / Municipality <span className="text-red-500">*</span></label>
+                  <div className="relative">
+                    <select 
+                      name="city" 
+                      className={cn(
+                        'flex h-10 w-full rounded-lg bg-white border border-slate-300 px-3 py-2 text-sm text-slate-900',
+                        'focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors shadow-sm'
+                      )}
+                      value={selectedCityName}
+                      onChange={(e) => {
+                        const val = e.target.value
+                        setSelectedCityName(val)
+                        setSelectedBarangayName('')
+                        const city = cities.find(c => c.name === val)
+                        setSelectedCityCode(city ? city.code : '')
+                      }}
+                      required
+                    >
+                      <option value="" disabled>Select City</option>
+                      {cities.map(c => (
+                        <option key={c.code} value={c.name}>{c.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
               </div>
               
               <div className="flex gap-3 justify-end pt-2">

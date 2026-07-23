@@ -7,7 +7,7 @@ import { StatusBadge } from '../../components/ui/StatusBadge'
 import { cn } from '../../components/ui/Button'
 import { usePermissions } from '../../hooks/usePermissions'
 import { useActivity } from '../../contexts/ActivityContext'
-import { Search, Plus, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, X, ShoppingCart, Download } from 'lucide-react'
+import { Search, Plus, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, X, ShoppingCart, Download, Image as ImageIcon, Upload, Trash2 } from 'lucide-react'
 
 interface Order {
   id: string
@@ -42,6 +42,12 @@ export function OrderListPage() {
   const [quantity, setQuantity] = useState<number | ''>('')
   const [price, setPrice] = useState<number | ''>('')
   const [amount, setAmount] = useState<number | ''>('')
+  
+  const [selectedOrderForPictures, setSelectedOrderForPictures] = useState<Order | null>(null)
+  const [orderPictures, setOrderPictures] = useState<any[]>([])
+  const [isLoadingPictures, setIsLoadingPictures] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
+  
   const perPage = 10
 
   useEffect(() => {
@@ -88,6 +94,68 @@ export function OrderListPage() {
   useEffect(() => {
     fetchData()
   }, [])
+
+  const openPicturesModal = async (order: Order) => {
+    setSelectedOrderForPictures(order)
+    fetchOrderPictures(order.id)
+  }
+
+  const closePicturesModal = () => {
+    setSelectedOrderForPictures(null)
+    setOrderPictures([])
+  }
+
+  const fetchOrderPictures = async (orderId: string) => {
+    setIsLoadingPictures(true)
+    const { data, error } = await supabase.storage.from('order_images').list(orderId)
+    if (data) {
+      const files = data.filter(file => file.name !== '.emptyFolderPlaceholder')
+      setOrderPictures(files)
+    } else {
+      console.error('Error fetching pictures:', error)
+    }
+    setIsLoadingPictures(false)
+  }
+
+  const handleUploadPictures = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || !selectedOrderForPictures || e.target.files.length === 0) return
+    setIsUploading(true)
+    
+    const files = Array.from(e.target.files)
+    const orderId = selectedOrderForPictures.id
+    
+    for (const file of files) {
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${Math.random().toString(36).substring(2, 15)}.${fileExt}`
+      const filePath = `${orderId}/${fileName}`
+      
+      const { error } = await supabase.storage.from('order_images').upload(filePath, file)
+      if (error) {
+        console.error('Error uploading:', error)
+      }
+    }
+    
+    fetchOrderPictures(orderId)
+    setIsUploading(false)
+  }
+
+  const handleDeletePicture = async (fileName: string) => {
+    if (!selectedOrderForPictures) return
+    if (!confirm('Are you sure you want to delete this picture?')) return
+    
+    const { error } = await supabase.storage.from('order_images').remove([`${selectedOrderForPictures.id}/${fileName}`])
+    if (!error) {
+      fetchOrderPictures(selectedOrderForPictures.id)
+    } else {
+      console.error('Error deleting picture:', error)
+    }
+  }
+
+  const getPictureUrl = (fileName: string) => {
+    if (!selectedOrderForPictures) return ''
+    const { data } = supabase.storage.from('order_images').getPublicUrl(`${selectedOrderForPictures.id}/${fileName}`)
+    return data.publicUrl
+  }
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase()
@@ -352,21 +420,31 @@ export function OrderListPage() {
                       <td className="py-3 px-4 text-slate-500">{new Date(o.order_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
                       {canEditRecords && (
                         <td className="py-3 px-4 text-right">
-                          {o.status === 'completed' || o.status === 'cancelled' ? (
-                            <span className={`inline-block h-7 px-3 py-1 rounded text-xs font-medium capitalize ${o.status === 'completed' ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}`}>
-                              {o.status}
-                            </span>
-                          ) : (
-                            <select
-                              defaultValue=""
-                              onChange={(e) => handleStatusChange(o.id, e.target.value as Order['status'])}
-                              className="h-7 rounded bg-white border border-slate-300 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white px-2 text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-amber-500 transition-colors capitalize"
+                          <div className="flex items-center justify-end gap-2">
+                            <button 
+                              onClick={() => openPicturesModal(o)}
+                              className="p-1.5 text-slate-500 hover:text-amber-600 hover:bg-amber-50 rounded transition-colors"
+                              title="Add/View Pictures"
                             >
-                              <option value="" disabled>Select Action</option>
-                              <option value="completed">Completed</option>
-                              <option value="cancelled">Cancelled</option>
-                            </select>
-                          )}
+                              <ImageIcon className="h-4 w-4" />
+                            </button>
+
+                            {o.status === 'completed' || o.status === 'cancelled' ? (
+                              <span className={`inline-block h-7 px-3 py-1 rounded text-xs font-medium capitalize ${o.status === 'completed' ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}`}>
+                                {o.status}
+                              </span>
+                            ) : (
+                              <select
+                                value=""
+                                onChange={(e) => handleStatusChange(o.id, e.target.value as Order['status'])}
+                                className="h-7 rounded bg-white border border-slate-300 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white px-2 text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-amber-500 transition-colors capitalize"
+                              >
+                                <option value="" disabled>Select Action</option>
+                                <option value="completed">Completed</option>
+                                <option value="cancelled">Cancelled</option>
+                              </select>
+                            )}
+                          </div>
                         </td>
                       )}
                     </tr>
@@ -520,6 +598,93 @@ export function OrderListPage() {
                 <Button type="submit" disabled={!orderCategory}>Create Order</Button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Pictures Modal */}
+      {selectedOrderForPictures && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={closePicturesModal} />
+          <div className="relative bg-white shadow-xl border border-slate-200 rounded-2xl p-6 w-full max-w-3xl animate-[fadeIn_0.2s_ease] max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between mb-5 shrink-0">
+              <div>
+                <h3 className="text-lg font-semibold text-slate-900">Order Pictures</h3>
+                <p className="text-sm text-slate-500">{selectedOrderForPictures.order_number} - {selectedOrderForPictures.customer_name}</p>
+              </div>
+              <button type="button" onClick={closePicturesModal} className="p-1 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-slate-100"><X className="h-5 w-5" /></button>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto min-h-[300px] mb-4 pr-2 mobile-scroll">
+              {isLoadingPictures ? (
+                <div className="flex items-center justify-center h-full text-slate-500">Loading pictures...</div>
+              ) : orderPictures.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full text-slate-500">
+                  <ImageIcon className="h-12 w-12 opacity-20 mb-3" />
+                  <p>No pictures uploaded yet.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                  {orderPictures.map((pic, idx) => (
+                    <div key={idx} className="group relative aspect-square bg-slate-100 rounded-lg overflow-hidden border border-slate-200">
+                      <img 
+                        src={getPictureUrl(pic.name)} 
+                        alt="Order picture" 
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                      />
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                         <a 
+                           href={getPictureUrl(pic.name)} 
+                           target="_blank" 
+                           rel="noreferrer"
+                           className="p-2 bg-white/20 hover:bg-white/40 rounded-full text-white backdrop-blur-sm transition-colors"
+                           title="View Full Size"
+                         >
+                           <Search className="h-4 w-4" />
+                         </a>
+                         <button
+                           onClick={() => handleDeletePicture(pic.name)}
+                           className="p-2 bg-red-500/80 hover:bg-red-500 rounded-full text-white backdrop-blur-sm transition-colors"
+                           title="Delete Picture"
+                         >
+                           <Trash2 className="h-4 w-4" />
+                         </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            
+            <div className="shrink-0 pt-4 border-t border-slate-200 flex items-center justify-between">
+              <div className="text-sm text-slate-500">
+                {orderPictures.length} picture(s)
+              </div>
+              <div className="flex items-center gap-3">
+                <Button type="button" variant="secondary" onClick={closePicturesModal}>Close</Button>
+                <div className="relative">
+                  <input 
+                    type="file" 
+                    multiple 
+                    accept="image/*" 
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
+                    onChange={handleUploadPictures}
+                    disabled={isUploading}
+                  />
+                  <Button type="button" disabled={isUploading} className="pointer-events-none">
+                    {isUploading ? (
+                      'Uploading...'
+                    ) : (
+                      <>
+                        <Upload className="h-4 w-4 mr-2" />
+                        Upload Pictures
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}

@@ -131,12 +131,24 @@ export function CustomerListPage() {
     e.preventDefault()
     const fd = new FormData(e.currentTarget)
     
+    let email = fd.get('email') as string
+    if (!email.toLowerCase().endsWith('@gmail.com')) {
+      // If they didn't include it, append it. Or if they put @yahoo.com, we could reject it.
+      // But let's just force @gmail.com
+      const username = email.split('@')[0]
+      email = `${username}@gmail.com`
+    }
+
+    const barangay = fd.get('barangay') as string
+    const city = fd.get('city') as string
+    const combinedAddress = [barangay, city].filter(Boolean).join(', ')
+    
     const customerData = {
       first_name: fd.get('firstName') as string,
       last_name: fd.get('lastName') as string,
-      email: fd.get('email') as string,
+      email: email,
       phone: fd.get('phone') as string,
-      address_line1: fd.get('address') as string,
+      address_line1: combinedAddress,
     }
     
     if (editingCustomer) {
@@ -326,9 +338,12 @@ export function CustomerListPage() {
                 <Input label="First Name" name="firstName" defaultValue={editingCustomer?.first_name} required />
                 <Input label="Last Name" name="lastName" defaultValue={editingCustomer?.last_name} required />
               </div>
-              <Input label="Email" name="email" type="email" defaultValue={editingCustomer?.email} required />
+              <Input label="Email" name="email" type="email" defaultValue={editingCustomer?.email} placeholder="username@gmail.com" required />
               <Input label="Phone" name="phone" defaultValue={editingCustomer?.phone} />
-              <Input label="Address" name="address" defaultValue={editingCustomer?.address} />
+              <div className="grid grid-cols-2 gap-3">
+                <Input label="Barangay" name="barangay" defaultValue={editingCustomer?.address?.split(', ')[0] || ''} />
+                <Input label="City" name="city" defaultValue={editingCustomer?.address?.split(', ')[1] || (editingCustomer?.address && !editingCustomer?.address?.includes(', ') ? editingCustomer?.address : '')} />
+              </div>
               
               <div className="flex gap-3 justify-end pt-2">
                 <Button type="button" variant="ghost" onClick={() => { setShowModal(false); setEditingCustomer(null); }}>Cancel</Button>

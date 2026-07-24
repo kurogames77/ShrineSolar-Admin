@@ -45,11 +45,21 @@ export function Sidebar({ isOpen, setIsOpen, isCollapsed = false, setIsCollapsed
 
       <div
         className={cn(
-          "fixed inset-y-0 left-0 z-50 transform flex flex-col bg-white border-r border-slate-200 transition-all duration-300 ease-in-out lg:static lg:translate-x-0 dark:bg-[#0a0e1a]/95 dark:backdrop-blur-md dark:border-white/5",
+          "fixed inset-y-0 left-0 z-50 transform flex flex-col bg-white border-r border-slate-200 transition-all duration-300 ease-in-out lg:relative lg:translate-x-0 dark:bg-[#0a0e1a]/95 dark:backdrop-blur-md dark:border-white/5",
           isOpen ? "translate-x-0" : "-translate-x-full",
           isCollapsed ? "w-20 lg:w-20" : "w-72 lg:w-64"
         )}
       >
+        {/* Collapse Toggle Button on Border */}
+        {setIsCollapsed && (
+          <button
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="hidden lg:flex absolute -right-3.5 top-20 z-50 h-7 w-7 items-center justify-center rounded-full bg-white border border-slate-200 text-slate-400 shadow-sm hover:text-slate-900 hover:bg-slate-50 transition-colors dark:bg-slate-900 dark:border-slate-700 dark:text-slate-400 dark:hover:text-white"
+            title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+          >
+            <ChevronLeft className={cn("h-4 w-4 transition-transform duration-300", isCollapsed && "rotate-180")} />
+          </button>
+        )}
         <div className="flex h-16 shrink-0 items-center justify-between px-4 border-b border-slate-200 dark:border-white/5 overflow-hidden">
           <div className={cn("flex items-center transition-all duration-300", isCollapsed ? "opacity-0 w-0 hidden" : "w-full pr-2 opacity-100")}>
             <img src="/banner.png" alt="Shrine Solar" className="h-16 w-full object-contain scale-110 origin-left dark-invert" />
@@ -98,16 +108,6 @@ export function Sidebar({ isOpen, setIsOpen, isCollapsed = false, setIsCollapsed
         </div>
         
         <div className="p-4 border-t border-slate-200 dark:border-white/5 flex flex-col gap-2">
-          {/* Collapse Toggle Button */}
-          {setIsCollapsed && (
-            <button
-              onClick={() => setIsCollapsed(!isCollapsed)}
-              className="hidden lg:flex items-center justify-center w-full p-2 text-slate-400 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors dark:hover:bg-white/5 dark:hover:text-white mb-2"
-              title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
-            >
-              <ChevronLeft className={cn("h-5 w-5 transition-transform duration-300", isCollapsed && "rotate-180")} />
-            </button>
-          )}
 
           {!isCollapsed ? (
             <>

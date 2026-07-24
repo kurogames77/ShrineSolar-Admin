@@ -619,12 +619,9 @@ export function OrderListPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={closePicturesModal} />
           <div className="relative bg-white shadow-xl border border-slate-200 rounded-2xl p-6 w-full max-w-3xl animate-[fadeIn_0.2s_ease] max-h-[90vh] flex flex-col">
-            <div className="flex items-center justify-between mb-5 shrink-0">
-              <div>
-                <h3 className="text-lg font-semibold text-slate-900">Order Pictures</h3>
-                <p className="text-sm text-slate-500">{selectedOrderForPictures.order_number} - {selectedOrderForPictures.customer_name}</p>
-              </div>
-              <button type="button" onClick={closePicturesModal} className="p-1 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-slate-100"><X className="h-5 w-5" /></button>
+            <div className="mb-5 shrink-0">
+              <h3 className="text-lg font-semibold text-slate-900">Order Pictures</h3>
+              <p className="text-sm text-slate-500">{selectedOrderForPictures.order_number} - {selectedOrderForPictures.customer_name}</p>
             </div>
             
             <div className="flex-1 overflow-y-auto min-h-[300px] mb-4 pr-2 mobile-scroll">

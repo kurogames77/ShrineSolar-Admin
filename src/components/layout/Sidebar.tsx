@@ -54,7 +54,7 @@ export function Sidebar({ isOpen, setIsOpen, isCollapsed = false, setIsCollapsed
         {setIsCollapsed && (
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="hidden lg:flex absolute -right-3.5 top-20 z-50 h-7 w-7 items-center justify-center rounded-full bg-white border border-slate-200 text-slate-400 shadow-sm hover:text-slate-900 hover:bg-slate-50 transition-colors dark:bg-slate-900 dark:border-slate-700 dark:text-slate-400 dark:hover:text-white"
+            className="hidden lg:flex absolute -right-3.5 top-1/2 -translate-y-1/2 z-50 h-7 w-7 items-center justify-center rounded-full bg-white border border-slate-200 text-slate-400 shadow-sm hover:text-slate-900 hover:bg-slate-50 transition-colors dark:bg-slate-900 dark:border-slate-700 dark:text-slate-400 dark:hover:text-white"
             title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
           >
             <ChevronLeft className={cn("h-4 w-4 transition-transform duration-300", isCollapsed && "rotate-180")} />

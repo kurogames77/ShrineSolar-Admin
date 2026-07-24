@@ -7,7 +7,7 @@ import { StatusBadge } from '../../components/ui/StatusBadge'
 import { cn } from '../../components/ui/Button'
 import { usePermissions } from '../../hooks/usePermissions'
 import { useActivity } from '../../contexts/ActivityContext'
-import { Search, Plus, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, X, ShoppingCart, Download, Image as ImageIcon, Upload, Trash2 } from 'lucide-react'
+import { Search, Plus, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, X, ShoppingCart, Download, Image as ImageIcon, Upload, Trash2, CheckCircle } from 'lucide-react'
 
 interface Order {
   id: string
@@ -47,6 +47,8 @@ export function OrderListPage() {
   const [orderPictures, setOrderPictures] = useState<any[]>([])
   const [isLoadingPictures, setIsLoadingPictures] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
+  const [pictureToDelete, setPictureToDelete] = useState<string | null>(null)
+  const [toast, setToast] = useState<{ message: string; visible: boolean } | null>(null)
   
   const perPage = 10
 
@@ -137,18 +139,28 @@ export function OrderListPage() {
     
     fetchOrderPictures(orderId)
     setIsUploading(false)
+    showToast(`${files.length} picture(s) uploaded successfully!`)
   }
 
-  const handleDeletePicture = async (fileName: string) => {
-    if (!selectedOrderForPictures) return
-    if (!confirm('Are you sure you want to delete this picture?')) return
+  const showToast = (message: string) => {
+    setToast({ message, visible: true })
+    setTimeout(() => {
+      setToast(prev => prev ? { ...prev, visible: false } : null)
+      setTimeout(() => setToast(null), 300)
+    }, 3000)
+  }
+
+  const confirmDeletePicture = async () => {
+    if (!selectedOrderForPictures || !pictureToDelete) return
     
-    const { error } = await supabase.storage.from('order_images').remove([`${selectedOrderForPictures.id}/${fileName}`])
+    const { error } = await supabase.storage.from('order_images').remove([`${selectedOrderForPictures.id}/${pictureToDelete}`])
     if (!error) {
       fetchOrderPictures(selectedOrderForPictures.id)
+      showToast('Picture deleted successfully!')
     } else {
       console.error('Error deleting picture:', error)
     }
+    setPictureToDelete(null)
   }
 
   const getPictureUrl = (fileName: string) => {
@@ -644,7 +656,7 @@ export function OrderListPage() {
                            <Search className="h-4 w-4" />
                          </a>
                          <button
-                           onClick={() => handleDeletePicture(pic.name)}
+                           onClick={() => setPictureToDelete(pic.name)}
                            className="p-2 bg-red-500/80 hover:bg-red-500 rounded-full text-white backdrop-blur-sm transition-colors"
                            title="Delete Picture"
                          >
@@ -686,6 +698,42 @@ export function OrderListPage() {
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Custom Delete Confirmation Modal */}
+      {pictureToDelete && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setPictureToDelete(null)} />
+          <div className="relative bg-white shadow-xl border border-slate-200 rounded-2xl p-6 w-full max-w-sm animate-[fadeIn_0.15s_ease]">
+            <div className="flex flex-col items-center text-center">
+              <div className="h-12 w-12 rounded-full bg-red-100 flex items-center justify-center mb-4">
+                <Trash2 className="h-6 w-6 text-red-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">Delete Picture</h3>
+              <p className="text-sm text-slate-500 mb-6">Are you sure you want to delete this picture? This action cannot be undone.</p>
+              <div className="flex gap-3 w-full">
+                <Button type="button" variant="secondary" className="flex-1" onClick={() => setPictureToDelete(null)}>Cancel</Button>
+                <button 
+                  onClick={confirmDeletePicture}
+                  className="flex-1 px-4 py-2 rounded-lg text-sm font-medium text-white bg-red-600 hover:bg-red-700 transition-colors shadow-sm"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Toast Notification */}
+      {toast && (
+        <div className={`fixed top-6 right-6 z-[70] flex items-center gap-3 px-4 py-3 bg-white shadow-lg border border-slate-200 rounded-xl ${toast.visible ? 'toast-enter' : 'toast-exit'}`}>
+          <CheckCircle className="h-5 w-5 text-emerald-500 shrink-0" />
+          <p className="text-sm font-medium text-slate-900">{toast.message}</p>
+          <button onClick={() => setToast(prev => prev ? { ...prev, visible: false } : null)} className="p-0.5 text-slate-400 hover:text-slate-900">
+            <X className="h-4 w-4" />
+          </button>
         </div>
       )}
     </div>

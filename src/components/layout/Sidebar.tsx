@@ -6,6 +6,7 @@ import {
   ShoppingCart, 
   Wrench, 
   Activity,
+  Package,
   LogOut,
   X,
   ChevronLeft
@@ -31,6 +32,7 @@ export function Sidebar({ isOpen, setIsOpen, isCollapsed = false, setIsCollapsed
     { name: 'Orders', href: '/orders', icon: ShoppingCart },
     { name: 'Installations', href: '/installations', icon: Wrench },
     { name: 'Activity Log', href: '/activity-log', icon: Activity },
+    { name: 'Products', href: '/products', icon: Package },
   ]
 
   return (

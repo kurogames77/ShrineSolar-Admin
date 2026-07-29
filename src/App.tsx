@@ -13,6 +13,7 @@ import { CustomerListPage } from './pages/customers/CustomerListPage'
 import { OrderListPage } from './pages/orders/OrderListPage'
 
 import { InstallationListPage } from './pages/installations/InstallationListPage'
+import { ProductsListPage } from './pages/products/ProductsListPage'
 import { ActivityLogPage } from './pages/ActivityLogPage'
 
 export default function App() {
@@ -33,6 +34,7 @@ export default function App() {
                 
                 {/* Admin only routes */}
                 <Route path="/activity-log" element={<ActivityLogPage />} />
+                <Route path="/products" element={<ProductsListPage />} />
               </Route>
 
               <Route path="*" element={<Navigate to="/" replace />} />

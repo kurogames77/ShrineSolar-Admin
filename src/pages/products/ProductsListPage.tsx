@@ -6,7 +6,7 @@ import { Input } from '../../components/ui/Input'
 import { cn } from '../../components/ui/Button'
 import { usePermissions } from '../../hooks/usePermissions'
 import { useActivity } from '../../contexts/ActivityContext'
-import { Search, Plus, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, X, Package, CheckCircle, Trash2, Edit2, Upload, ImageIcon } from 'lucide-react'
+import { Search, Plus, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, X, Package, CheckCircle, Trash2, Edit2, Upload } from 'lucide-react'
 
 export interface Product {
   id: string
@@ -122,7 +122,7 @@ export function ProductsListPage() {
     }
 
     if (editingProduct) {
-      const { error } = await supabase.from('products').update(productData).eq('id', editingProduct.id)
+      const { error } = await supabase.from('products').update(productData as any).eq('id', editingProduct.id)
       if (!error) {
         addActivity('edit', 'product', productData.name, `Updated product details`)
         showToast('Product updated successfully')
@@ -169,7 +169,7 @@ export function ProductsListPage() {
     
     if (!uploadError) {
       const { data } = supabase.storage.from('product_images').getPublicUrl(filePath)
-      await supabase.from('products').update({ image_url: data.publicUrl }).eq('id', productId)
+      await supabase.from('products').update({ image_url: data.publicUrl } as any).eq('id', productId)
       showToast('Image uploaded successfully')
       fetchData()
     } else {

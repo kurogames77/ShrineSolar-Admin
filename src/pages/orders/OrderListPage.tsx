@@ -7,7 +7,7 @@ import { StatusBadge } from '../../components/ui/StatusBadge'
 import { cn } from '../../components/ui/Button'
 import { usePermissions } from '../../hooks/usePermissions'
 import { useActivity } from '../../contexts/ActivityContext'
-import { Search, Plus, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, X, ShoppingCart, Download, Image as ImageIcon, Upload, Trash2, CheckCircle } from 'lucide-react'
+import { Search, Plus, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, X, ShoppingCart, Download, Camera, Upload, Trash2, CheckCircle } from 'lucide-react'
 
 interface Order {
   id: string
@@ -438,7 +438,7 @@ export function OrderListPage() {
                               className="p-1.5 text-slate-500 hover:text-amber-600 hover:bg-amber-50 rounded transition-colors"
                               title="Add/View Pictures"
                             >
-                              <ImageIcon className="h-4 w-4" />
+                              <Camera className="h-4 w-4" />
                             </button>
 
                             {o.status === 'completed' || o.status === 'cancelled' ? (
@@ -629,7 +629,7 @@ export function OrderListPage() {
                 <div className="flex items-center justify-center h-full text-slate-500">Loading pictures...</div>
               ) : orderPictures.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-slate-500">
-                  <ImageIcon className="h-12 w-12 opacity-20 mb-3" />
+                  <Camera className="h-12 w-12 opacity-20 mb-3" />
                   <p>No pictures uploaded yet.</p>
                 </div>
               ) : (

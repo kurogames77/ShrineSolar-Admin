@@ -5,7 +5,7 @@ import { StatusBadge } from '../../components/ui/StatusBadge'
 import { Button, cn } from '../../components/ui/Button'
 import { usePermissions } from '../../hooks/usePermissions'
 import { useActivity } from '../../contexts/ActivityContext'
-import { Search, Wrench, ClipboardCheck, HardHat, Eye, Pause, CheckCircle2, ChevronLeft, ChevronRight, Download, X } from 'lucide-react'
+import { Search, Wrench, ClipboardCheck, HardHat, Eye, Pause, CheckCircle2, ChevronLeft, ChevronRight, Download, X, Camera, Upload } from 'lucide-react'
 
 interface Installation {
   id: string
@@ -36,7 +36,9 @@ export function InstallationListPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [page, setPage] = useState(1)
   const [rescheduleModal, setRescheduleModal] = useState<{isOpen: boolean, instId: string | null}>({ isOpen: false, instId: null })
+  const [pictureModal, setPictureModal] = useState<{isOpen: boolean, instId: string | null}>({ isOpen: false, instId: null })
   const [newDate, setNewDate] = useState('')
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const perPage = 10
 
   const fetchData = async () => {
@@ -136,6 +138,19 @@ export function InstallationListPage() {
     }
     setRescheduleModal({ isOpen: false, instId: null })
     setNewDate('')
+  }
+
+  const submitPicture = async () => {
+    if (pictureModal.instId && selectedFile) {
+      const inst = installations.find(i => i.id === pictureModal.instId)
+      
+      // Simulating upload for now, to hook up to Supabase storage later
+      if (inst) {
+        addActivity('upload_picture', 'installation', inst.order_number, `Uploaded a picture for ${inst.customer_name}`)
+      }
+    }
+    setPictureModal({ isOpen: false, instId: null })
+    setSelectedFile(null)
   }
 
   const fmtDate = (d: string | null) => d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'
@@ -244,23 +259,32 @@ export function InstallationListPage() {
                       <td className="py-3 px-4 text-slate-500">{fmtDate(inst.completion_date)}</td>
                       {canEditRecords && (
                         <td className="py-3 px-4 text-right">
-                          {inst.installation_status === 'completed' ? (
-                            <span className="inline-block h-7 px-3 py-1 rounded text-xs font-medium capitalize bg-emerald-50 text-emerald-600">
-                              Completed
-                            </span>
-                          ) : (
-                            <select value={inst.installation_status} onChange={(e) => handleStatusChange(inst.id, e.target.value)} className="h-7 rounded bg-white border border-slate-300 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white px-2 text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-amber-500 transition-colors capitalize">
-                              {inst.installation_status === 'scheduled' && <option value="scheduled" hidden>Scheduled</option>}
-                              {inst.installation_status === 'site_survey' && <option value="site_survey" hidden>Site Survey</option>}
-                              {inst.installation_status === 'in_progress' && <option value="in_progress" hidden>In Progress</option>}
-                              {inst.installation_status === 'on_hold' && <option value="on_hold" hidden>On Hold</option>}
-                              <option value="reschedule">Reschedule</option>
-                              <option value="site_survey">Site Survey</option>
-                              <option value="in_progress">In Progress</option>
-                              <option value="completed">Completed</option>
-                              <option value="on_hold">On Hold</option>
-                            </select>
-                          )}
+                          <div className="flex items-center justify-end gap-2">
+                            <button 
+                              onClick={() => setPictureModal({ isOpen: true, instId: inst.id })} 
+                              className="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded transition-colors" 
+                              title="Add Picture"
+                            >
+                              <Camera className="h-4 w-4" />
+                            </button>
+                            {inst.installation_status === 'completed' ? (
+                              <span className="inline-block h-7 px-3 py-1 rounded text-xs font-medium capitalize bg-emerald-50 text-emerald-600">
+                                Completed
+                              </span>
+                            ) : (
+                              <select value={inst.installation_status} onChange={(e) => handleStatusChange(inst.id, e.target.value)} className="h-7 rounded bg-white border border-slate-300 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white px-2 text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-amber-500 transition-colors capitalize">
+                                {inst.installation_status === 'scheduled' && <option value="scheduled" hidden>Scheduled</option>}
+                                {inst.installation_status === 'site_survey' && <option value="site_survey" hidden>Site Survey</option>}
+                                {inst.installation_status === 'in_progress' && <option value="in_progress" hidden>In Progress</option>}
+                                {inst.installation_status === 'on_hold' && <option value="on_hold" hidden>On Hold</option>}
+                                <option value="reschedule">Reschedule</option>
+                                <option value="site_survey">Site Survey</option>
+                                <option value="in_progress">In Progress</option>
+                                <option value="completed">Completed</option>
+                                <option value="on_hold">On Hold</option>
+                              </select>
+                            )}
+                          </div>
                         </td>
                       )}
                     </tr>
@@ -311,6 +335,47 @@ export function InstallationListPage() {
             <div className="flex items-center justify-end gap-2 px-4 py-3 bg-slate-50 border-t border-slate-100">
               <Button variant="secondary" onClick={() => setRescheduleModal({ isOpen: false, instId: null })}>Cancel</Button>
               <Button onClick={submitReschedule} disabled={!newDate}>Confirm Reschedule</Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Picture Modal */}
+      {pictureModal.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-[fadeIn_0.2s_ease]">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden animate-[slideIn_0.2s_ease]">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
+              <h3 className="font-semibold text-slate-900 dark:text-white">Add Picture</h3>
+              <button onClick={() => { setPictureModal({ isOpen: false, instId: null }); setSelectedFile(null); }} className="text-slate-400 hover:text-slate-600 dark:text-slate-300 transition-colors">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="p-4 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Select Image</label>
+                <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-300 border-dashed rounded-lg hover:bg-slate-50 transition-colors">
+                  <div className="space-y-1 text-center">
+                    <Camera className="mx-auto h-12 w-12 text-slate-400" />
+                    <div className="flex text-sm text-slate-600 justify-center mt-2">
+                      <label htmlFor="file-upload" className="relative cursor-pointer rounded-md bg-white font-medium text-amber-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-amber-500 focus-within:ring-offset-2 hover:text-amber-500">
+                        <span>Upload a file</span>
+                        <input id="file-upload" name="file-upload" type="file" accept="image/*" className="sr-only" onChange={(e) => setSelectedFile(e.target.files?.[0] || null)} />
+                      </label>
+                    </div>
+                    <p className="text-xs text-slate-500 mt-1">PNG, JPG, GIF up to 10MB</p>
+                  </div>
+                </div>
+                {selectedFile && (
+                  <p className="mt-2 text-sm text-slate-600 text-center font-medium">Selected: {selectedFile.name}</p>
+                )}
+              </div>
+            </div>
+            <div className="flex items-center justify-end gap-2 px-4 py-3 bg-slate-50 border-t border-slate-100">
+              <Button variant="secondary" onClick={() => { setPictureModal({ isOpen: false, instId: null }); setSelectedFile(null); }}>Cancel</Button>
+              <Button onClick={submitPicture} disabled={!selectedFile}>
+                <Upload className="h-4 w-4 mr-2" />
+                Upload
+              </Button>
             </div>
           </div>
         </div>

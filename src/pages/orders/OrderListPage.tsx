@@ -284,7 +284,7 @@ export function OrderListPage() {
       productType = `Battery: ${fd.get('batteryModel')}${qtyStr}`
       sizeOrQty = Number(fd.get('capacity'))
     } else {
-      productType = `${orderCategory}: ${fd.get('itemDescription')}`
+      productType = `${orderCategory}${qtyStr}`
       sizeOrQty = Number(fd.get('quantity'))
     }
 
@@ -599,7 +599,6 @@ export function OrderListPage() {
 
               {['Accessories & Monitoring', 'Solar Portable Power Station', 'Wires', 'PV Mounting Accessories', "Breakers & SPD's", 'Rapid Shutdown Device'].includes(orderCategory) && (
                 <>
-                  <Input label="Item Description" name="itemDescription" required />
                   <div className="grid grid-cols-2 gap-3">
                     <Input label="Quantity" name="quantity" type="number" required value={quantity} onChange={e => setQuantity(e.target.value ? Number(e.target.value) : '')} />
                   </div>

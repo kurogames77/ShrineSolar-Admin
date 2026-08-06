@@ -274,17 +274,17 @@ export function OrderListPage() {
     let qty = fd.get('quantity')
     let qtyStr = qty ? ` (x${qty})` : ''
 
-    if (orderCategory === 'Solar Panel') {
+    if (orderCategory === 'Solar Panels') {
       productType = `${fd.get('product_details')}${qtyStr}`
       sizeOrQty = Number(fd.get('systemSize'))
-    } else if (orderCategory === 'Inverter') {
+    } else if (orderCategory === 'Inverters') {
       productType = `Inverter: ${fd.get('inverterModel')}${qtyStr}`
       sizeOrQty = Number(fd.get('inverterCapacity'))
-    } else if (orderCategory === 'Battery') {
+    } else if (orderCategory === 'Energy Storage') {
       productType = `Battery: ${fd.get('batteryModel')}${qtyStr}`
       sizeOrQty = Number(fd.get('capacity'))
     } else {
-      productType = `Accessory: ${fd.get('itemDescription')}`
+      productType = `${orderCategory}: ${fd.get('itemDescription')}`
       sizeOrQty = Number(fd.get('quantity'))
     }
 
@@ -512,14 +512,19 @@ export function OrderListPage() {
                   required
                 >
                   <option value="" disabled>Select a category...</option>
-                  <option value="Solar Panel">Solar Panel</option>
-                  <option value="Battery">Battery</option>
-                  <option value="Inverter">Inverter</option>
-                  <option value="Accessories">Accessories</option>
+                  <option value="Inverters">Inverters</option>
+                  <option value="Accessories & Monitoring">Accessories & Monitoring</option>
+                  <option value="Solar Panels">Solar Panels</option>
+                  <option value="Energy Storage">Energy Storage</option>
+                  <option value="Solar Portable Power Station">Solar Portable Power Station</option>
+                  <option value="Wires">Wires</option>
+                  <option value="PV Mounting Accessories">PV Mounting Accessories</option>
+                  <option value="Breakers & SPD's">Breakers & SPD's</option>
+                  <option value="Rapid Shutdown Device">Rapid Shutdown Device</option>
                 </select>
               </div>
 
-              {orderCategory === 'Solar Panel' && (
+              {orderCategory === 'Solar Panels' && (
                 <>
                   <div className="space-y-1.5">
                     <label className="text-sm font-medium text-slate-700">Panel Type</label>
@@ -544,7 +549,7 @@ export function OrderListPage() {
                 </>
               )}
 
-              {orderCategory === 'Battery' && (
+              {orderCategory === 'Energy Storage' && (
                 <>
                   <div className="space-y-1.5">
                     <label className="text-sm font-medium text-slate-700">Battery Model <span className="text-red-500">*</span></label>
@@ -568,7 +573,7 @@ export function OrderListPage() {
                 </>
               )}
 
-              {orderCategory === 'Inverter' && (
+              {orderCategory === 'Inverters' && (
                 <>
                   <div className="space-y-1.5">
                     <label className="text-sm font-medium text-slate-700">Inverter Model <span className="text-red-500">*</span></label>
@@ -592,7 +597,7 @@ export function OrderListPage() {
                 </>
               )}
 
-              {orderCategory === 'Accessories' && (
+              {['Accessories & Monitoring', 'Solar Portable Power Station', 'Wires', 'PV Mounting Accessories', "Breakers & SPD's", 'Rapid Shutdown Device'].includes(orderCategory) && (
                 <>
                   <Input label="Item Description" name="itemDescription" required />
                   <div className="grid grid-cols-2 gap-3">

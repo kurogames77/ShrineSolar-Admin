@@ -6,7 +6,7 @@ import { Input } from '../../components/ui/Input'
 import { cn } from '../../components/ui/Button'
 import { usePermissions } from '../../hooks/usePermissions'
 import { useActivity } from '../../contexts/ActivityContext'
-import { Search, Plus, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, X, Tool, CheckCircle, Trash2, Edit2 } from 'lucide-react'
+import { Search, Plus, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, X, Settings, CheckCircle, Trash2, Edit2 } from 'lucide-react'
 
 export interface MaintenanceRequest {
   id: string
@@ -269,7 +269,7 @@ export function MaintenanceListPage() {
                     </tr>
                   ))
                 ) : (
-                  <tr><td colSpan={6} className="py-12 text-center text-slate-500"><Tool className="h-8 w-8 mx-auto mb-2 opacity-50" />No requests found.</td></tr>
+                  <tr><td colSpan={6} className="py-12 text-center text-slate-500"><Settings className="h-8 w-8 mx-auto mb-2 opacity-50" />No requests found.</td></tr>
                 )}
               </tbody>
             </table>

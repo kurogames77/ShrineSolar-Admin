@@ -157,19 +157,25 @@ export function InstallationListPage() {
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return
-    const newFiles = Array.from(e.target.files).map(file => ({
-      file,
-      previewUrl: URL.createObjectURL(file)
-    }))
-    setSelectedFiles(prev => [...prev, ...newFiles])
+    
+    const files = Array.from(e.target.files)
+    
+    files.forEach(file => {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setSelectedFiles(prev => [...prev, {
+          file,
+          previewUrl: reader.result as string
+        }])
+      }
+      reader.readAsDataURL(file)
+    })
+
     e.target.value = ''
   }
 
   const removeSelectedFile = (index: number) => {
-    setSelectedFiles(prev => {
-      URL.revokeObjectURL(prev[index].previewUrl)
-      return prev.filter((_, i) => i !== index)
-    })
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index))
   }
 
   const openPicturesModal = (inst: Installation) => {
@@ -180,7 +186,6 @@ export function InstallationListPage() {
   const closePicturesModal = () => {
     setPicturesModalInst(null)
     setInstallationPictures([])
-    selectedFiles.forEach(f => URL.revokeObjectURL(f.previewUrl))
     setSelectedFiles([])
   }
 
@@ -244,7 +249,6 @@ export function InstallationListPage() {
       showToast(`${uploadedCount} of ${selectedFiles.length} picture(s) uploaded — some failed.`)
     }
 
-    selectedFiles.forEach(f => URL.revokeObjectURL(f.previewUrl))
     setSelectedFiles([])
   }
 

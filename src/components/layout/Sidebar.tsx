@@ -9,7 +9,8 @@ import {
   Package,
   LogOut,
   X,
-  ChevronLeft
+  ChevronLeft,
+  Tool
 } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 
@@ -33,6 +34,7 @@ export function Sidebar({ isOpen, setIsOpen, isCollapsed = false, setIsCollapsed
     { name: 'Installations', href: '/installations', icon: Wrench },
     { name: 'Activity Log', href: '/activity-log', icon: Activity },
     { name: 'Products', href: '/products', icon: Package },
+    { name: 'Maintenance', href: '/maintenance', icon: Tool },
   ]
 
   return (

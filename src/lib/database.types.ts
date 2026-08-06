@@ -231,6 +231,44 @@ export interface Database {
           updated_at?: string
         }
       }
+      maintenance_requests: {
+        Row: {
+          id: string
+          customer_name: string
+          customer_email: string
+          customer_phone: string | null
+          system_details: string | null
+          issue_description: string
+          status: 'pending' | 'reviewed' | 'scheduled' | 'completed' | 'cancelled'
+          preferred_date: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          customer_name: string
+          customer_email: string
+          customer_phone?: string | null
+          system_details?: string | null
+          issue_description: string
+          status?: 'pending' | 'reviewed' | 'scheduled' | 'completed' | 'cancelled'
+          preferred_date?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          customer_name?: string
+          customer_email?: string
+          customer_phone?: string | null
+          system_details?: string | null
+          issue_description?: string
+          status?: 'pending' | 'reviewed' | 'scheduled' | 'completed' | 'cancelled'
+          preferred_date?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never

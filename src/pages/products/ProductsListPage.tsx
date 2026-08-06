@@ -321,7 +321,7 @@ export function ProductsListPage() {
 
       {/* Edit/Create Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-start pt-[10vh] justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={closeModal} />
           <div className="relative bg-white shadow-xl border border-slate-200 rounded-2xl p-6 w-full max-w-lg animate-[fadeIn_0.2s_ease]">
             <div className="flex items-center justify-between mb-5">

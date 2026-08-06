@@ -5,7 +5,7 @@ import { StatusBadge } from '../../components/ui/StatusBadge'
 import { Button, cn } from '../../components/ui/Button'
 import { usePermissions } from '../../hooks/usePermissions'
 import { useActivity } from '../../contexts/ActivityContext'
-import { Search, Wrench, ClipboardCheck, HardHat, Eye, Pause, CheckCircle2, ChevronLeft, ChevronRight, Download, X, Camera, Upload, CheckCircle } from 'lucide-react'
+import { Search, Wrench, ClipboardCheck, HardHat, Eye, Pause, CheckCircle2, ChevronLeft, ChevronRight, Download, X, Camera, Upload, CheckCircle, Trash2 } from 'lucide-react'
 
 interface Installation {
   id: string
@@ -36,19 +36,17 @@ export function InstallationListPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [page, setPage] = useState(1)
   const [rescheduleModal, setRescheduleModal] = useState<{isOpen: boolean, instId: string | null}>({ isOpen: false, instId: null })
-  const [pictureModal, setPictureModal] = useState<{isOpen: boolean, instId: string | null}>({ isOpen: false, instId: null })
   const [newDate, setNewDate] = useState('')
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([])
-  const [previewUrls, setPreviewUrls] = useState<string[]>([])
+  const [picturesModalInst, setPicturesModalInst] = useState<Installation | null>(null)
+  const [installationPictures, setInstallationPictures] = useState<any[]>([])
+  const [isLoadingPictures, setIsLoadingPictures] = useState(false)
+  const [pictureToDelete, setPictureToDelete] = useState<string | null>(null)
+  const [selectedFiles, setSelectedFiles] = useState<{file: File, previewUrl: string}[]>([])
   const [isUploading, setIsUploading] = useState(false)
   const [toast, setToast] = useState<{ message: string; visible: boolean } | null>(null)
   const perPage = 10
 
-  useEffect(() => {
-    const urls = selectedFiles.map(file => URL.createObjectURL(file))
-    setPreviewUrls(urls)
-    return () => { urls.forEach(url => URL.revokeObjectURL(url)) }
-  }, [selectedFiles])
+
 
   const fetchData = async () => {
     setIsLoading(true)
@@ -159,30 +157,72 @@ export function InstallationListPage() {
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return
-    setSelectedFiles(prev => [...prev, ...Array.from(e.target.files!)])
+    const newFiles = Array.from(e.target.files).map(file => ({
+      file,
+      previewUrl: URL.createObjectURL(file)
+    }))
+    setSelectedFiles(prev => [...prev, ...newFiles])
     e.target.value = ''
   }
 
   const removeSelectedFile = (index: number) => {
-    setSelectedFiles(prev => prev.filter((_, i) => i !== index))
+    setSelectedFiles(prev => {
+      URL.revokeObjectURL(prev[index].previewUrl)
+      return prev.filter((_, i) => i !== index)
+    })
   }
 
-  const closePictureModal = () => {
-    setPictureModal({ isOpen: false, instId: null })
+  const openPicturesModal = (inst: Installation) => {
+    setPicturesModalInst(inst)
+    fetchInstallationPictures(inst.id)
+  }
+
+  const closePicturesModal = () => {
+    setPicturesModalInst(null)
+    setInstallationPictures([])
+    selectedFiles.forEach(f => URL.revokeObjectURL(f.previewUrl))
     setSelectedFiles([])
   }
 
+  const fetchInstallationPictures = async (instId: string) => {
+    setIsLoadingPictures(true)
+    const { data, error } = await supabase.storage.from('installation_images').list(instId)
+    if (data) {
+      setInstallationPictures(data.filter(file => file.name !== '.emptyFolderPlaceholder'))
+    } else {
+      console.error('Error fetching pictures:', error)
+    }
+    setIsLoadingPictures(false)
+  }
+
+  const getPictureUrl = (fileName: string) => {
+    if (!picturesModalInst) return ''
+    const { data } = supabase.storage.from('installation_images').getPublicUrl(`${picturesModalInst.id}/${fileName}`)
+    return data.publicUrl
+  }
+
+  const confirmDeletePicture = async () => {
+    if (!picturesModalInst || !pictureToDelete) return
+    const { error } = await supabase.storage.from('installation_images').remove([`${picturesModalInst.id}/${pictureToDelete}`])
+    if (!error) {
+      fetchInstallationPictures(picturesModalInst.id)
+      showToast('Picture deleted successfully!')
+    } else {
+      console.error('Error deleting picture:', error)
+    }
+    setPictureToDelete(null)
+  }
+
   const submitPicture = async () => {
-    if (!pictureModal.instId || selectedFiles.length === 0) return
-    const instId = pictureModal.instId
-    const inst = installations.find(i => i.id === instId)
+    if (!picturesModalInst || selectedFiles.length === 0) return
+    const inst = picturesModalInst
 
     setIsUploading(true)
     let uploadedCount = 0
-    for (const file of selectedFiles) {
+    for (const { file } of selectedFiles) {
       const fileExt = file.name.split('.').pop()
       const fileName = `${Math.random().toString(36).substring(2, 15)}.${fileExt}`
-      const filePath = `${instId}/${fileName}`
+      const filePath = `${inst.id}/${fileName}`
 
       const { error } = await supabase.storage.from('installation_images').upload(filePath, file)
       if (error) {
@@ -193,8 +233,9 @@ export function InstallationListPage() {
     }
     setIsUploading(false)
 
-    if (uploadedCount > 0 && inst) {
+    if (uploadedCount > 0) {
       addActivity('upload_picture', 'installation', inst.order_number, `Uploaded ${uploadedCount} picture(s) for ${inst.customer_name}`)
+      fetchInstallationPictures(inst.id)
     }
 
     if (uploadedCount === selectedFiles.length) {
@@ -203,7 +244,8 @@ export function InstallationListPage() {
       showToast(`${uploadedCount} of ${selectedFiles.length} picture(s) uploaded — some failed.`)
     }
 
-    closePictureModal()
+    selectedFiles.forEach(f => URL.revokeObjectURL(f.previewUrl))
+    setSelectedFiles([])
   }
 
   const fmtDate = (d: string | null) => d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'
@@ -314,9 +356,9 @@ export function InstallationListPage() {
                         <td className="py-3 px-4 text-right">
                           <div className="flex items-center justify-end gap-2">
                             <button 
-                              onClick={() => setPictureModal({ isOpen: true, instId: inst.id })} 
-                              className="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded transition-colors" 
-                              title="Add Picture"
+                              onClick={() => openPicturesModal(inst)}
+                              className="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded transition-colors"
+                              title="View/Add Pictures"
                             >
                               <Camera className="h-4 w-4" />
                             </button>
@@ -393,65 +435,139 @@ export function InstallationListPage() {
         </div>
       )}
 
-      {/* Picture Modal */}
-      {pictureModal.isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-[fadeIn_0.2s_ease]">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden animate-[slideIn_0.2s_ease] max-h-[90vh] flex flex-col">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 shrink-0">
-              <h3 className="font-semibold text-slate-900 dark:text-white">Add Pictures</h3>
-              <button onClick={closePictureModal} className="text-slate-400 hover:text-slate-600 dark:text-slate-300 transition-colors">
-                <X className="h-5 w-5" />
-              </button>
+      {/* Pictures Modal (gallery + upload) */}
+      {picturesModalInst && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={closePicturesModal} />
+          <div className="relative bg-white shadow-xl border border-slate-200 rounded-2xl p-6 w-full max-w-3xl animate-[fadeIn_0.2s_ease] max-h-[90vh] flex flex-col">
+            <div className="mb-5 shrink-0">
+              <h3 className="text-lg font-semibold text-slate-900">Installation Pictures</h3>
+              <p className="text-sm text-slate-500">{picturesModalInst.order_number} - {picturesModalInst.customer_name}</p>
             </div>
-            <div className="p-4 space-y-4 overflow-y-auto mobile-scroll">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Select Images</label>
-                <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-300 border-dashed rounded-lg hover:bg-slate-50 transition-colors">
+
+            <div className="flex-1 overflow-y-auto min-h-[240px] mb-4 pr-2 mobile-scroll space-y-6">
+              {/* Existing gallery */}
+              {isLoadingPictures ? (
+                <div className="flex items-center justify-center h-32 text-slate-500">Loading pictures...</div>
+              ) : installationPictures.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-32 text-slate-500">
+                  <Camera className="h-10 w-10 opacity-20 mb-2" />
+                  <p className="text-sm">No pictures uploaded yet.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                  {installationPictures.map((pic, idx) => (
+                    <div key={idx} className="group relative aspect-square bg-slate-100 rounded-lg overflow-hidden border border-slate-200">
+                      <img
+                        src={getPictureUrl(pic.name)}
+                        alt="Installation picture"
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                      />
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                        <a
+                          href={getPictureUrl(pic.name)}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="p-2 bg-white/20 hover:bg-white/40 rounded-full text-white backdrop-blur-sm transition-colors"
+                          title="View Full Size"
+                        >
+                          <Search className="h-4 w-4" />
+                        </a>
+                        <button
+                          onClick={() => setPictureToDelete(pic.name)}
+                          className="p-2 bg-red-500/80 hover:bg-red-500 rounded-full text-white backdrop-blur-sm transition-colors"
+                          title="Delete Picture"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Add new pictures */}
+              <div className="border-t border-slate-200 pt-4">
+                <label className="block text-sm font-medium text-slate-700 mb-1">Add Pictures</label>
+                <label 
+                  htmlFor="file-upload" 
+                  className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-300 border-dashed rounded-lg hover:bg-slate-50 transition-colors cursor-pointer focus-within:outline-none focus-within:ring-2 focus-within:ring-amber-500 focus-within:ring-offset-2"
+                >
                   <div className="space-y-1 text-center">
-                    <Camera className="mx-auto h-12 w-12 text-slate-400" />
+                    <Camera className="mx-auto h-10 w-10 text-slate-400" />
                     <div className="flex text-sm text-slate-600 justify-center mt-2">
-                      <label htmlFor="file-upload" className="relative cursor-pointer rounded-md bg-white font-medium text-amber-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-amber-500 focus-within:ring-offset-2 hover:text-amber-500">
-                        <span>Upload files</span>
+                      <span className="relative font-medium text-amber-600 hover:text-amber-500">
+                        Upload files
                         <input id="file-upload" name="file-upload" type="file" accept="image/*" multiple className="sr-only" onChange={handleFileSelect} disabled={isUploading} />
-                      </label>
+                      </span>
                     </div>
                     <p className="text-xs text-slate-500 mt-1">PNG, JPG, GIF up to 10MB each · multiple allowed</p>
                   </div>
-                </div>
-              </div>
+                </label>
 
-              {selectedFiles.length > 0 && (
-                <div>
-                  <p className="text-sm font-medium text-slate-700 mb-2">Selected ({selectedFiles.length})</p>
-                  <div className="grid grid-cols-3 gap-3">
-                    {selectedFiles.map((file, idx) => (
-                      <div key={idx} className="group relative aspect-square bg-slate-100 rounded-lg overflow-hidden border border-slate-200">
-                        <img src={previewUrls[idx]} alt={file.name} className="w-full h-full object-cover" />
-                        <button
-                          type="button"
-                          onClick={() => removeSelectedFile(idx)}
-                          disabled={isUploading}
-                          className="absolute top-1 right-1 p-1 bg-black/60 hover:bg-red-600 rounded-full text-white transition-colors disabled:opacity-50"
-                          title="Remove"
-                        >
-                          <X className="h-3 w-3" />
-                        </button>
-                      </div>
-                    ))}
+                {selectedFiles.length > 0 && (
+                  <div className="mt-3">
+                    <p className="text-sm font-medium text-slate-700 mb-2">Selected ({selectedFiles.length})</p>
+                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                      {selectedFiles.map((item, idx) => (
+                        <div key={idx} className="group relative aspect-square bg-slate-100 rounded-lg overflow-hidden border border-slate-200">
+                          <img src={item.previewUrl} alt={item.file.name} className="w-full h-full object-cover" />
+                          <button
+                            type="button"
+                            onClick={() => removeSelectedFile(idx)}
+                            disabled={isUploading}
+                            className="absolute top-1 right-1 p-1 bg-black/60 hover:bg-red-600 rounded-full text-white transition-colors disabled:opacity-50"
+                            title="Remove"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
-            </div>
-            <div className="flex items-center justify-end gap-2 px-4 py-3 bg-slate-50 border-t border-slate-100 shrink-0">
-              <Button variant="secondary" onClick={closePictureModal} disabled={isUploading}>Cancel</Button>
-              <Button onClick={submitPicture} disabled={selectedFiles.length === 0 || isUploading}>
-                {isUploading ? 'Uploading...' : (
-                  <>
-                    <Upload className="h-4 w-4 mr-2" />
-                    Upload {selectedFiles.length > 0 ? `(${selectedFiles.length})` : ''}
-                  </>
                 )}
-              </Button>
+              </div>
+            </div>
+
+            <div className="shrink-0 pt-4 border-t border-slate-200 flex items-center justify-between">
+              <div className="text-sm text-slate-500">{installationPictures.length} picture(s)</div>
+              <div className="flex items-center gap-3">
+                <Button type="button" variant="secondary" onClick={closePicturesModal}>Close</Button>
+                <Button onClick={submitPicture} disabled={selectedFiles.length === 0 || isUploading}>
+                  {isUploading ? 'Uploading...' : (
+                    <>
+                      <Upload className="h-4 w-4 mr-2" />
+                      Upload {selectedFiles.length > 0 ? `(${selectedFiles.length})` : ''}
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Picture Confirmation Modal */}
+      {pictureToDelete && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setPictureToDelete(null)} />
+          <div className="relative bg-white shadow-xl border border-slate-200 rounded-2xl p-6 w-full max-w-sm animate-[fadeIn_0.15s_ease]">
+            <div className="flex flex-col items-center text-center">
+              <div className="h-12 w-12 rounded-full bg-red-100 flex items-center justify-center mb-4">
+                <Trash2 className="h-6 w-6 text-red-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">Delete Picture</h3>
+              <p className="text-sm text-slate-500 mb-6">Are you sure you want to delete this picture? This action cannot be undone.</p>
+              <div className="flex gap-3 w-full">
+                <Button type="button" variant="secondary" className="flex-1" onClick={() => setPictureToDelete(null)}>Cancel</Button>
+                <button
+                  onClick={confirmDeletePicture}
+                  className="flex-1 px-4 py-2 rounded-lg text-sm font-medium text-white bg-red-600 hover:bg-red-700 transition-colors shadow-sm"
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           </div>
         </div>

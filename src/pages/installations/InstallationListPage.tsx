@@ -5,7 +5,7 @@ import { StatusBadge } from '../../components/ui/StatusBadge'
 import { Button, cn } from '../../components/ui/Button'
 import { usePermissions } from '../../hooks/usePermissions'
 import { useActivity } from '../../contexts/ActivityContext'
-import { Search, Wrench, ClipboardCheck, HardHat, Eye, Pause, CheckCircle2, ChevronLeft, ChevronRight, Download, X, Camera, Upload } from 'lucide-react'
+import { Search, Wrench, ClipboardCheck, HardHat, Eye, Pause, CheckCircle2, ChevronLeft, ChevronRight, Download, X, Camera, Upload, CheckCircle } from 'lucide-react'
 
 interface Installation {
   id: string
@@ -38,8 +38,17 @@ export function InstallationListPage() {
   const [rescheduleModal, setRescheduleModal] = useState<{isOpen: boolean, instId: string | null}>({ isOpen: false, instId: null })
   const [pictureModal, setPictureModal] = useState<{isOpen: boolean, instId: string | null}>({ isOpen: false, instId: null })
   const [newDate, setNewDate] = useState('')
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([])
+  const [previewUrls, setPreviewUrls] = useState<string[]>([])
+  const [isUploading, setIsUploading] = useState(false)
+  const [toast, setToast] = useState<{ message: string; visible: boolean } | null>(null)
   const perPage = 10
+
+  useEffect(() => {
+    const urls = selectedFiles.map(file => URL.createObjectURL(file))
+    setPreviewUrls(urls)
+    return () => { urls.forEach(url => URL.revokeObjectURL(url)) }
+  }, [selectedFiles])
 
   const fetchData = async () => {
     setIsLoading(true)
@@ -140,17 +149,61 @@ export function InstallationListPage() {
     setNewDate('')
   }
 
+  const showToast = (message: string) => {
+    setToast({ message, visible: true })
+    setTimeout(() => {
+      setToast(prev => prev ? { ...prev, visible: false } : null)
+      setTimeout(() => setToast(null), 300)
+    }, 3000)
+  }
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return
+    setSelectedFiles(prev => [...prev, ...Array.from(e.target.files!)])
+    e.target.value = ''
+  }
+
+  const removeSelectedFile = (index: number) => {
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index))
+  }
+
+  const closePictureModal = () => {
+    setPictureModal({ isOpen: false, instId: null })
+    setSelectedFiles([])
+  }
+
   const submitPicture = async () => {
-    if (pictureModal.instId && selectedFile) {
-      const inst = installations.find(i => i.id === pictureModal.instId)
-      
-      // Simulating upload for now, to hook up to Supabase storage later
-      if (inst) {
-        addActivity('upload_picture', 'installation', inst.order_number, `Uploaded a picture for ${inst.customer_name}`)
+    if (!pictureModal.instId || selectedFiles.length === 0) return
+    const instId = pictureModal.instId
+    const inst = installations.find(i => i.id === instId)
+
+    setIsUploading(true)
+    let uploadedCount = 0
+    for (const file of selectedFiles) {
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${Math.random().toString(36).substring(2, 15)}.${fileExt}`
+      const filePath = `${instId}/${fileName}`
+
+      const { error } = await supabase.storage.from('installation_images').upload(filePath, file)
+      if (error) {
+        console.error('Error uploading:', error)
+      } else {
+        uploadedCount++
       }
     }
-    setPictureModal({ isOpen: false, instId: null })
-    setSelectedFile(null)
+    setIsUploading(false)
+
+    if (uploadedCount > 0 && inst) {
+      addActivity('upload_picture', 'installation', inst.order_number, `Uploaded ${uploadedCount} picture(s) for ${inst.customer_name}`)
+    }
+
+    if (uploadedCount === selectedFiles.length) {
+      showToast(`${uploadedCount} picture(s) uploaded successfully!`)
+    } else {
+      showToast(`${uploadedCount} of ${selectedFiles.length} picture(s) uploaded — some failed.`)
+    }
+
+    closePictureModal()
   }
 
   const fmtDate = (d: string | null) => d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'
@@ -343,41 +396,75 @@ export function InstallationListPage() {
       {/* Picture Modal */}
       {pictureModal.isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-[fadeIn_0.2s_ease]">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden animate-[slideIn_0.2s_ease]">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
-              <h3 className="font-semibold text-slate-900 dark:text-white">Add Picture</h3>
-              <button onClick={() => { setPictureModal({ isOpen: false, instId: null }); setSelectedFile(null); }} className="text-slate-400 hover:text-slate-600 dark:text-slate-300 transition-colors">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden animate-[slideIn_0.2s_ease] max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 shrink-0">
+              <h3 className="font-semibold text-slate-900 dark:text-white">Add Pictures</h3>
+              <button onClick={closePictureModal} className="text-slate-400 hover:text-slate-600 dark:text-slate-300 transition-colors">
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <div className="p-4 space-y-4">
+            <div className="p-4 space-y-4 overflow-y-auto mobile-scroll">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Select Image</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Select Images</label>
                 <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-300 border-dashed rounded-lg hover:bg-slate-50 transition-colors">
                   <div className="space-y-1 text-center">
                     <Camera className="mx-auto h-12 w-12 text-slate-400" />
                     <div className="flex text-sm text-slate-600 justify-center mt-2">
                       <label htmlFor="file-upload" className="relative cursor-pointer rounded-md bg-white font-medium text-amber-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-amber-500 focus-within:ring-offset-2 hover:text-amber-500">
-                        <span>Upload a file</span>
-                        <input id="file-upload" name="file-upload" type="file" accept="image/*" className="sr-only" onChange={(e) => setSelectedFile(e.target.files?.[0] || null)} />
+                        <span>Upload files</span>
+                        <input id="file-upload" name="file-upload" type="file" accept="image/*" multiple className="sr-only" onChange={handleFileSelect} disabled={isUploading} />
                       </label>
                     </div>
-                    <p className="text-xs text-slate-500 mt-1">PNG, JPG, GIF up to 10MB</p>
+                    <p className="text-xs text-slate-500 mt-1">PNG, JPG, GIF up to 10MB each · multiple allowed</p>
                   </div>
                 </div>
-                {selectedFile && (
-                  <p className="mt-2 text-sm text-slate-600 text-center font-medium">Selected: {selectedFile.name}</p>
-                )}
               </div>
+
+              {selectedFiles.length > 0 && (
+                <div>
+                  <p className="text-sm font-medium text-slate-700 mb-2">Selected ({selectedFiles.length})</p>
+                  <div className="grid grid-cols-3 gap-3">
+                    {selectedFiles.map((file, idx) => (
+                      <div key={idx} className="group relative aspect-square bg-slate-100 rounded-lg overflow-hidden border border-slate-200">
+                        <img src={previewUrls[idx]} alt={file.name} className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => removeSelectedFile(idx)}
+                          disabled={isUploading}
+                          className="absolute top-1 right-1 p-1 bg-black/60 hover:bg-red-600 rounded-full text-white transition-colors disabled:opacity-50"
+                          title="Remove"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-            <div className="flex items-center justify-end gap-2 px-4 py-3 bg-slate-50 border-t border-slate-100">
-              <Button variant="secondary" onClick={() => { setPictureModal({ isOpen: false, instId: null }); setSelectedFile(null); }}>Cancel</Button>
-              <Button onClick={submitPicture} disabled={!selectedFile}>
-                <Upload className="h-4 w-4 mr-2" />
-                Upload
+            <div className="flex items-center justify-end gap-2 px-4 py-3 bg-slate-50 border-t border-slate-100 shrink-0">
+              <Button variant="secondary" onClick={closePictureModal} disabled={isUploading}>Cancel</Button>
+              <Button onClick={submitPicture} disabled={selectedFiles.length === 0 || isUploading}>
+                {isUploading ? 'Uploading...' : (
+                  <>
+                    <Upload className="h-4 w-4 mr-2" />
+                    Upload {selectedFiles.length > 0 ? `(${selectedFiles.length})` : ''}
+                  </>
+                )}
               </Button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Toast Notification */}
+      {toast && (
+        <div className={`fixed top-6 right-6 z-[70] flex items-center gap-3 px-4 py-3 bg-white shadow-lg border border-slate-200 rounded-xl ${toast.visible ? 'toast-enter' : 'toast-exit'}`}>
+          <CheckCircle className="h-5 w-5 text-emerald-500 shrink-0" />
+          <p className="text-sm font-medium text-slate-900">{toast.message}</p>
+          <button onClick={() => setToast(prev => prev ? { ...prev, visible: false } : null)} className="p-0.5 text-slate-400 hover:text-slate-900">
+            <X className="h-4 w-4" />
+          </button>
         </div>
       )}
     </div>

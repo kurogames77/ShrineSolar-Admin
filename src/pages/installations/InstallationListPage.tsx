@@ -11,17 +11,16 @@ interface Installation {
   id: string
   order_number: string
   customer_name: string
-  installation_status: 'scheduled' | 'site_survey' | 'in_progress' | 'completed' | 'on_hold'
+  installation_status: 'scheduled' | 'in_progress' | 'completed' | 'on_hold'
   scheduled_date: string
   completion_date: string | null
 }
 
 
-const statusTabs = ['all', 'scheduled', 'site_survey', 'in_progress', 'completed', 'on_hold'] as const
+const statusTabs = ['all', 'scheduled', 'in_progress', 'completed', 'on_hold'] as const
 
 const pipelineConfig = [
   { key: 'scheduled', label: 'Scheduled', icon: ClipboardCheck, color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-200' },
-  { key: 'site_survey', label: 'Site Survey', icon: Eye, color: 'text-cyan-600', bg: 'bg-cyan-50', border: 'border-cyan-200' },
   { key: 'in_progress', label: 'In Progress', icon: HardHat, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-200' },
   { key: 'completed', label: 'Completed', icon: CheckCircle2, color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-200' },
   { key: 'on_hold', label: 'On Hold', icon: Pause, color: 'text-red-600', bg: 'bg-red-50', border: 'border-red-200' },
@@ -44,6 +43,8 @@ export function InstallationListPage() {
   const [selectedFiles, setSelectedFiles] = useState<{file: File, previewUrl: string}[]>([])
   const [isUploading, setIsUploading] = useState(false)
   const [toast, setToast] = useState<{ message: string; visible: boolean } | null>(null)
+  const [showDownloadModal, setShowDownloadModal] = useState(false)
+  const [downloadCustomer, setDownloadCustomer] = useState('all')
   const perPage = 10
 
 
@@ -94,7 +95,7 @@ export function InstallationListPage() {
       return matchSearch && matchStatus
     })
 
-    const orderWeight: Record<string, number> = { scheduled: 1, site_survey: 2, in_progress: 3, completed: 4, on_hold: 5 }
+    const orderWeight: Record<string, number> = { scheduled: 1, in_progress: 2, completed: 3, on_hold: 4 }
     return filteredList.sort((a, b) => {
       const wA = orderWeight[a.installation_status] || 99
       const wB = orderWeight[b.installation_status] || 99
@@ -255,7 +256,7 @@ export function InstallationListPage() {
   const fmtDate = (d: string | null) => d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'
 
   const downloadCompletedInstallations = () => {
-    const completed = installations.filter(i => i.installation_status === 'completed')
+    const completed = installations.filter(i => i.installation_status === 'completed' && (downloadCustomer === 'all' || i.customer_name === downloadCustomer))
     if (completed.length === 0) return
     const today = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
     const html = `
@@ -295,9 +296,9 @@ export function InstallationListPage() {
           <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Installations</h2>
           <p className="text-sm text-slate-500 mt-1">Track installation pipeline.</p>
         </div>
-        <Button variant="secondary" onClick={downloadCompletedInstallations} className="shrink-0">
+        <Button variant="secondary" onClick={() => setShowDownloadModal(true)} className="shrink-0">
           <Download className="h-4 w-4 mr-2" />
-          Download Completed
+          Download File
         </Button>
       </div>
 
@@ -373,11 +374,9 @@ export function InstallationListPage() {
                             ) : (
                               <select value={inst.installation_status} onChange={(e) => handleStatusChange(inst.id, e.target.value)} className="h-7 rounded bg-white border border-slate-300 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white px-2 text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-amber-500 transition-colors capitalize">
                                 {inst.installation_status === 'scheduled' && <option value="scheduled" hidden>Scheduled</option>}
-                                {inst.installation_status === 'site_survey' && <option value="site_survey" hidden>Site Survey</option>}
                                 {inst.installation_status === 'in_progress' && <option value="in_progress" hidden>In Progress</option>}
                                 {inst.installation_status === 'on_hold' && <option value="on_hold" hidden>On Hold</option>}
                                 <option value="reschedule">Reschedule</option>
-                                <option value="site_survey">Site Survey</option>
                                 <option value="in_progress">In Progress</option>
                                 <option value="completed">Completed</option>
                                 <option value="on_hold">On Hold</option>
@@ -572,6 +571,38 @@ export function InstallationListPage() {
                   Delete
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Download Modal */}
+      {showDownloadModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowDownloadModal(false)} />
+          <div className="relative bg-white shadow-xl border border-slate-200 rounded-2xl p-6 w-full max-w-sm animate-[fadeIn_0.15s_ease]">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Download Completed</h3>
+              <button type="button" onClick={() => setShowDownloadModal(false)} className="p-1 rounded-lg text-slate-400 hover:text-slate-900 dark:text-white hover:bg-slate-100"><X className="h-5 w-5" /></button>
+            </div>
+            <div className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-slate-700">Select Customer</label>
+                <select 
+                  value={downloadCustomer}
+                  onChange={e => setDownloadCustomer(e.target.value)}
+                  className="flex h-10 w-full rounded-lg bg-white border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 transition-colors"
+                >
+                  <option value="all">All Customers (Entire Transactions)</option>
+                  {Array.from(new Set(installations.filter(i => i.installation_status === 'completed').map(i => i.customer_name))).sort().map(name => (
+                    <option key={name} value={name}>{name}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="flex gap-3 justify-end pt-5 mt-2 border-t border-slate-100">
+              <Button type="button" variant="secondary" onClick={() => setShowDownloadModal(false)}>Cancel</Button>
+              <Button onClick={() => { downloadCompletedInstallations(); setShowDownloadModal(false); }}>Download</Button>
             </div>
           </div>
         </div>

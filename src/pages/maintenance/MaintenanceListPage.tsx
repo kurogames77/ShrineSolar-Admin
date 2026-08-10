@@ -309,20 +309,32 @@ export function MaintenanceListPage() {
                 <Input label="Preferred Date" name="preferred_date" type="date" defaultValue={editingRequest?.preferred_date || ''} />
               </div>
               
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium text-slate-700">Status *</label>
-                <select name="status" required defaultValue={editingRequest?.status || 'pending'} className="flex h-10 w-full rounded-lg bg-white border border-slate-300 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500 transition-colors">
-                  <option value="pending">Pending</option>
-                  <option value="reviewed">Reviewed</option>
-                  <option value="scheduled">Scheduled</option>
-                  <option value="completed">Completed</option>
-                  <option value="cancelled">Cancelled</option>
-                </select>
-              </div>
+              {editingRequest ? (
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium text-slate-700">Status *</label>
+                  <select name="status" required defaultValue={editingRequest.status} className="flex h-10 w-full rounded-lg bg-white border border-slate-300 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500 transition-colors">
+                    <option value="pending">Pending</option>
+                    <option value="reviewed">Reviewed</option>
+                    <option value="scheduled">Scheduled</option>
+                    <option value="completed">Completed</option>
+                    <option value="cancelled">Cancelled</option>
+                  </select>
+                </div>
+              ) : (
+                <input type="hidden" name="status" value="pending" />
+              )}
 
               <div className="space-y-1.5">
                 <label className="text-sm font-medium text-slate-700">System Details</label>
-                <textarea name="system_details" rows={2} defaultValue={editingRequest?.system_details || ''} placeholder="Size of system, components, etc." className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors resize-none"></textarea>
+                <select name="system_details" defaultValue={editingRequest?.system_details || ''} className="flex h-10 w-full rounded-lg bg-white border border-slate-300 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500 transition-colors">
+                  <option value="" disabled>Select system component...</option>
+                  <option value="Solar Panels">Solar Panels</option>
+                  <option value="Inverter">Inverter</option>
+                  <option value="Battery Storage">Battery Storage</option>
+                  <option value="Monitoring System">Monitoring System</option>
+                  <option value="Wiring / Electrical">Wiring / Electrical</option>
+                  <option value="Other">Other</option>
+                </select>
               </div>
 
               <div className="space-y-1.5">

@@ -328,12 +328,15 @@ export function MaintenanceListPage() {
                 <label className="text-sm font-medium text-slate-700">System Details</label>
                 <select name="system_details" defaultValue={editingRequest?.system_details || ''} className="flex h-10 w-full rounded-lg bg-white border border-slate-300 dark:bg-slate-900/50 dark:border-slate-700 dark:text-white px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500 transition-colors">
                   <option value="" disabled>Select system component...</option>
+                  <option value="Inverters">Inverters</option>
+                  <option value="Accessories & Monitoring">Accessories & Monitoring</option>
                   <option value="Solar Panels">Solar Panels</option>
-                  <option value="Inverter">Inverter</option>
-                  <option value="Battery Storage">Battery Storage</option>
-                  <option value="Monitoring System">Monitoring System</option>
-                  <option value="Wiring / Electrical">Wiring / Electrical</option>
-                  <option value="Other">Other</option>
+                  <option value="Energy Storage">Energy Storage</option>
+                  <option value="Solar Portable Power Station">Solar Portable Power Station</option>
+                  <option value="Wires">Wires</option>
+                  <option value="PV Mounting Accessories">PV Mounting Accessories</option>
+                  <option value="Breakers & SPD's">Breakers & SPD's</option>
+                  <option value="Rapid Shutdown Device">Rapid Shutdown Device</option>
                 </select>
               </div>
 

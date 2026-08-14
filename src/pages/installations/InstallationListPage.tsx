@@ -5,7 +5,7 @@ import { StatusBadge } from '../../components/ui/StatusBadge'
 import { Button, cn } from '../../components/ui/Button'
 import { usePermissions } from '../../hooks/usePermissions'
 import { useActivity } from '../../contexts/ActivityContext'
-import { Search, Wrench, ClipboardCheck, HardHat, Eye, Pause, CheckCircle2, ChevronLeft, ChevronRight, Download, X, Camera, Upload, CheckCircle, Trash2 } from 'lucide-react'
+import { Search, Wrench, ClipboardCheck, HardHat, Pause, CheckCircle2, ChevronLeft, ChevronRight, Download, X, Camera, Upload, CheckCircle, Trash2 } from 'lucide-react'
 
 interface Installation {
   id: string

@@ -41,6 +41,8 @@ export function ProductsListPage() {
   const [productToDelete, setProductToDelete] = useState<Product | null>(null)
   const [toast, setToast] = useState<{ message: string; visible: boolean } | null>(null)
   const [isUploading, setIsUploading] = useState(false)
+  const [selectedImage, setSelectedImage] = useState<File | null>(null)
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null)
 
   const perPage = 10
 
@@ -106,10 +108,13 @@ export function ProductsListPage() {
   const closeModal = () => {
     setShowModal(false)
     setEditingProduct(null)
+    setSelectedImage(null)
+    setImagePreviewUrl(null)
   }
 
   const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    setIsUploading(true)
     const fd = new FormData(e.currentTarget)
     
     const productData = {
@@ -123,8 +128,11 @@ export function ProductsListPage() {
 
     if (editingProduct) {
       // @ts-ignore
-      const { error } = await supabase.from('products').update(productData as any).eq('id', editingProduct.id)
+      const { data: updatedData, error } = await supabase.from('products').update(productData as any).eq('id', editingProduct.id).select().single()
       if (!error) {
+        if (selectedImage && updatedData) {
+          await handleModalImageUpload(selectedImage, (updatedData as any).id)
+        }
         addActivity('edit', 'product', productData.name, `Updated product details`)
         showToast('Product updated successfully')
         fetchData()
@@ -136,6 +144,9 @@ export function ProductsListPage() {
       // @ts-ignore
       const { data, error } = await supabase.from('products').insert([productData] as any).select().single()
       if (!error && data) {
+        if (selectedImage) {
+          await handleModalImageUpload(selectedImage, (data as any).id)
+        }
         addActivity('add', 'product', productData.name, `Added new product`)
         showToast('Product added successfully')
         fetchData()
@@ -144,6 +155,7 @@ export function ProductsListPage() {
         console.error(error)
       }
     }
+    setIsUploading(false)
   }
 
   const confirmDelete = async () => {
@@ -157,6 +169,28 @@ export function ProductsListPage() {
       console.error(error)
     }
     setProductToDelete(null)
+  }
+
+  const onModalImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0]
+      setSelectedImage(file)
+      setImagePreviewUrl(URL.createObjectURL(file))
+    }
+  }
+
+  const handleModalImageUpload = async (file: File, productId: string) => {
+    const fileExt = file.name.split('.').pop()
+    const fileName = `${Math.random().toString(36).substring(2, 15)}.${fileExt}`
+    const filePath = `products/${productId}/${fileName}`
+    
+    const { error: uploadError } = await supabase.storage.from('product_images').upload(filePath, file)
+    
+    if (!uploadError) {
+      const { data } = supabase.storage.from('product_images').getPublicUrl(filePath)
+      // @ts-ignore
+      await supabase.from('products').update({ image_url: data.publicUrl } as any).eq('id', productId)
+    }
   }
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, productId: string) => {
@@ -329,6 +363,22 @@ export function ProductsListPage() {
               <button type="button" onClick={closeModal} className="p-1 rounded-lg text-slate-400 hover:text-slate-900 dark:text-white hover:bg-slate-100"><X className="h-5 w-5" /></button>
             </div>
             <form onSubmit={handleSave} className="space-y-4">
+              <div className="flex justify-center mb-4">
+                <div className="relative h-32 w-32 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 flex items-center justify-center overflow-hidden group">
+                  {(imagePreviewUrl || editingProduct?.image_url) ? (
+                    <img src={imagePreviewUrl || editingProduct?.image_url!} alt="Preview" className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center text-slate-400">
+                      <Upload className="h-6 w-6 mb-2 text-slate-400" />
+                      <span className="text-xs font-medium">Upload Image</span>
+                    </div>
+                  )}
+                  <label className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity">
+                    <span className="text-white text-xs font-medium">Change</span>
+                    <input type="file" accept="image/*" className="hidden" onChange={onModalImageChange} disabled={isUploading} />
+                  </label>
+                </div>
+              </div>
               <div className="grid grid-cols-2 gap-3">
                 <Input label="Product Name *" name="name" required defaultValue={editingProduct?.name || ''} />
                 <div className="space-y-1.5">
@@ -362,7 +412,7 @@ export function ProductsListPage() {
 
               <div className="flex gap-3 justify-end pt-4 border-t border-slate-100">
                 <Button type="button" variant="secondary" onClick={closeModal}>Cancel</Button>
-                <Button type="submit">Save Product</Button>
+                <Button type="submit" disabled={isUploading}>{isUploading ? 'Saving...' : 'Save Product'}</Button>
               </div>
             </form>
           </div>

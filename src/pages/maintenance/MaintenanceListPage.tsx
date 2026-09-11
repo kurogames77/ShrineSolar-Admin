@@ -6,7 +6,7 @@ import { Input } from '../../components/ui/Input'
 import { cn } from '../../components/ui/Button'
 import { usePermissions } from '../../hooks/usePermissions'
 import { useActivity } from '../../contexts/ActivityContext'
-import { Search, Plus, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, X, Settings, CheckCircle, Trash2, Edit2 } from 'lucide-react'
+import { Search, Plus, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, X, Settings, CheckCircle, Trash2, Edit2, Download, Ban } from 'lucide-react'
 
 export interface MaintenanceRequest {
   id: string
@@ -168,6 +168,43 @@ export function MaintenanceListPage() {
     setRequestToDelete(null)
   }
 
+  const quickUpdateStatus = async (request: MaintenanceRequest, newStatus: 'completed' | 'cancelled') => {
+    const { data, error } = await supabase.from('maintenance_requests').update({ status: newStatus } as any).eq('id', request.id).select()
+    if (error) {
+      console.error(error)
+      showToast(`Failed to mark as ${newStatus}`)
+    } else if (!data || data.length === 0) {
+      showToast('Update failed — insufficient permissions')
+    } else {
+      addActivity('edit', 'maintenance', request.customer_name, `Marked maintenance request as ${newStatus}`)
+      showToast(`Request marked as ${newStatus}`)
+      fetchData()
+    }
+  }
+
+  const downloadCSV = () => {
+    const headers = ['Customer Name', 'Email', 'Phone', 'Address', 'Status', 'System Details', 'Preferred Date', 'Submitted On', 'Issue Description']
+    const rows = sorted.map(r => [
+      r.customer_name,
+      r.customer_email,
+      r.customer_phone || '',
+      r.address || '',
+      r.status,
+      r.system_details || '',
+      r.preferred_date ? new Date(r.preferred_date).toLocaleDateString() : '',
+      new Date(r.created_at).toLocaleDateString(),
+      r.issue_description,
+    ])
+    const csvContent = [headers, ...rows].map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n')
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `maintenance_requests_${new Date().toISOString().slice(0, 10)}.csv`
+    link.click()
+    URL.revokeObjectURL(url)
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -176,6 +213,10 @@ export function MaintenanceListPage() {
           <p className="text-sm text-slate-500 mt-1">{filtered.length} requests found</p>
         </div>
         <div className="flex items-center gap-2">
+          <Button variant="secondary" onClick={downloadCSV} className="shrink-0">
+            <Download className="h-4 w-4 mr-2" />
+            Download
+          </Button>
           {canCreateRecords && (
             <Button onClick={() => setShowModal(true)} className="shrink-0">
               <Plus className="h-4 w-4 mr-2" />
@@ -244,7 +285,7 @@ export function MaintenanceListPage() {
               </thead>
               <tbody>
                 {isLoading ? (
-                  <tr><td colSpan={7} className="py-12 text-center text-slate-500">Loading requests...</td></tr>
+                  <tr><td colSpan={8} className="py-12 text-center text-slate-500">Loading requests...</td></tr>
                 ) : paged.length > 0 ? (
                   paged.map(r => (
                     <tr key={r.id} className="border-b border-slate-200 hover:bg-slate-50 transition-colors">
@@ -278,7 +319,17 @@ export function MaintenanceListPage() {
                       </td>
                       {canEditRecords && (
                         <td className="py-3 px-4 text-right">
-                          <div className="flex items-center justify-end gap-2">
+                          <div className="flex items-center justify-end gap-1">
+                            {r.status !== 'completed' && (
+                              <button onClick={() => quickUpdateStatus(r, 'completed')} className="p-1.5 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded transition-colors" title="Mark Completed">
+                                <CheckCircle className="h-4 w-4" />
+                              </button>
+                            )}
+                            {r.status !== 'cancelled' && (
+                              <button onClick={() => quickUpdateStatus(r, 'cancelled')} className="p-1.5 text-slate-500 hover:text-orange-600 hover:bg-orange-50 rounded transition-colors" title="Mark Cancelled">
+                                <Ban className="h-4 w-4" />
+                              </button>
+                            )}
                             <button onClick={() => { setEditingRequest(r); setShowModal(true); }} className="p-1.5 text-slate-500 hover:text-amber-600 hover:bg-amber-50 rounded transition-colors" title="Edit">
                               <Edit2 className="h-4 w-4" />
                             </button>
@@ -293,7 +344,7 @@ export function MaintenanceListPage() {
                     </tr>
                   ))
                 ) : (
-                  <tr><td colSpan={6} className="py-12 text-center text-slate-500"><Settings className="h-8 w-8 mx-auto mb-2 opacity-50" />No requests found.</td></tr>
+                  <tr><td colSpan={8} className="py-12 text-center text-slate-500"><Settings className="h-8 w-8 mx-auto mb-2 opacity-50" />No requests found.</td></tr>
                 )}
               </tbody>
             </table>

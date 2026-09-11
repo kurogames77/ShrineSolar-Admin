@@ -13,6 +13,7 @@ export interface MaintenanceRequest {
   customer_name: string
   customer_email: string
   customer_phone: string | null
+  address: string | null
   system_details: string | null
   issue_description: string
   status: 'pending' | 'reviewed' | 'scheduled' | 'completed' | 'cancelled'
@@ -114,6 +115,7 @@ export function MaintenanceListPage() {
       customer_name: fd.get('customer_name') as string,
       customer_email: fd.get('customer_email') as string,
       customer_phone: fd.get('customer_phone') as string,
+      address: fd.get('address') as string,
       system_details: fd.get('system_details') as string,
       issue_description: fd.get('issue_description') as string,
       status: fd.get('status') as any,
@@ -231,6 +233,7 @@ export function MaintenanceListPage() {
                       <td className="py-3 px-4 text-slate-900 dark:text-white font-medium">
                         {r.customer_name}
                         <div className="text-xs text-slate-500 font-normal">{r.customer_email}</div>
+                        {r.address && <div className="text-xs text-slate-400 font-normal mt-0.5">{r.address}</div>}
                       </td>
                       <td className="py-3 px-4">
                         <span className={cn(
@@ -308,6 +311,7 @@ export function MaintenanceListPage() {
                 <Input label="Phone" name="customer_phone" defaultValue={editingRequest?.customer_phone || ''} />
                 <Input label="Preferred Date" name="preferred_date" type="date" defaultValue={editingRequest?.preferred_date || ''} />
               </div>
+              <Input label="Address" name="address" defaultValue={editingRequest?.address || ''} />
               
               {editingRequest ? (
                 <div className="space-y-1.5">

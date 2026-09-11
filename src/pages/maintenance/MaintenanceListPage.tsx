@@ -182,25 +182,38 @@ export function MaintenanceListPage() {
     }
   }
 
-  const downloadCSV = () => {
-    const headers = ['Customer Name', 'Email', 'Phone', 'Address', 'Status', 'System Details', 'Preferred Date', 'Submitted On', 'Issue Description']
-    const rows = sorted.map(r => [
-      r.customer_name,
-      r.customer_email,
-      r.customer_phone || '',
-      r.address || '',
-      r.status,
-      r.system_details || '',
-      r.preferred_date ? new Date(r.preferred_date).toLocaleDateString() : '',
-      new Date(r.created_at).toLocaleDateString(),
-      r.issue_description,
-    ])
-    const csvContent = [headers, ...rows].map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n')
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+  const downloadWord = () => {
+    const rowsHtml = sorted.map(r => `
+      <div style="margin-bottom: 20px; border-bottom: 1px solid #ccc; padding-bottom: 10px;">
+        <h3>Customer: ${r.customer_name}</h3>
+        <p><strong>Email:</strong> ${r.customer_email}<br/>
+        <strong>Phone:</strong> ${r.customer_phone || 'N/A'}<br/>
+        <strong>Address:</strong> ${r.address || 'N/A'}</p>
+        <p><strong>Status:</strong> ${r.status}<br/>
+        <strong>System Details:</strong> ${r.system_details || 'N/A'}<br/>
+        <strong>Preferred Date:</strong> ${r.preferred_date ? new Date(r.preferred_date).toLocaleDateString() : 'N/A'}<br/>
+        <strong>Submitted On:</strong> ${new Date(r.created_at).toLocaleDateString()}</p>
+        <p><strong>Issue Description:</strong><br/>${r.issue_description.replace(/\n/g, '<br/>')}</p>
+      </div>
+    `).join('')
+
+    const htmlContent = `
+      <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+      <head><meta charset="utf-8"><title>Maintenance Requests</title></head>
+      <body style="font-family: Arial, sans-serif;">
+        <h2>Maintenance Requests</h2>
+        <p>Generated on ${new Date().toLocaleDateString()}</p>
+        <hr/>
+        ${rowsHtml}
+      </body>
+      </html>
+    `
+
+    const blob = new Blob(['\ufeff', htmlContent], { type: 'application/msword' })
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
-    link.download = `maintenance_requests_${new Date().toISOString().slice(0, 10)}.csv`
+    link.download = `maintenance_requests_${new Date().toISOString().slice(0, 10)}.doc`
     link.click()
     URL.revokeObjectURL(url)
   }
@@ -213,7 +226,7 @@ export function MaintenanceListPage() {
           <p className="text-sm text-slate-500 mt-1">{filtered.length} requests found</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="secondary" onClick={downloadCSV} className="shrink-0">
+          <Button variant="secondary" onClick={downloadWord} className="shrink-0">
             <Download className="h-4 w-4 mr-2" />
             Download
           </Button>

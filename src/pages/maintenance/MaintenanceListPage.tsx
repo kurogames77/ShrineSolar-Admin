@@ -124,14 +124,18 @@ export function MaintenanceListPage() {
 
     if (editingRequest) {
       // @ts-ignore
-      const { error } = await supabase.from('maintenance_requests').update(requestData as any).eq('id', editingRequest.id)
-      if (!error) {
+      const { data, error } = await supabase.from('maintenance_requests').update(requestData as any).eq('id', editingRequest.id).select()
+      if (error) {
+        console.error(error)
+        showToast('Failed to update request')
+      } else if (!data || data.length === 0) {
+        console.error('Update returned 0 rows — RLS policy may be blocking the operation')
+        showToast('Update failed — insufficient permissions')
+      } else {
         addActivity('edit', 'maintenance', requestData.customer_name, `Updated maintenance request`)
         showToast('Request updated successfully')
         fetchData()
         closeModal()
-      } else {
-        console.error(error)
       }
     } else {
       // @ts-ignore

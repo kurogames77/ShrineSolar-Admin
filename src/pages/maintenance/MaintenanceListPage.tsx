@@ -149,13 +149,17 @@ export function MaintenanceListPage() {
 
   const confirmDelete = async () => {
     if (!requestToDelete) return
-    const { error } = await supabase.from('maintenance_requests').delete().eq('id', requestToDelete.id)
-    if (!error) {
+    const { data, error } = await supabase.from('maintenance_requests').delete().eq('id', requestToDelete.id).select()
+    if (error) {
+      console.error(error)
+      showToast('Failed to delete request')
+    } else if (!data || data.length === 0) {
+      console.error('Delete returned 0 rows — RLS policy may be blocking the operation')
+      showToast('Delete failed — insufficient permissions')
+    } else {
       addActivity('delete', 'maintenance', requestToDelete.customer_name, `Deleted maintenance request`)
       showToast('Request deleted successfully')
       fetchData()
-    } else {
-      console.error(error)
     }
     setRequestToDelete(null)
   }

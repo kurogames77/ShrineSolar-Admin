@@ -218,6 +218,16 @@ export function MaintenanceListPage() {
                   {([
                     { key: 'customer_name' as SortKey, label: 'Customer' },
                     { key: 'status' as SortKey, label: 'Status' },
+                  ] as Array<{ key: SortKey; label: string }>).map((col, i) => (
+                    <th key={i} onClick={() => toggleSort(col.key)} className="text-left py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider cursor-pointer hover:text-slate-900 dark:text-white transition-colors group select-none">
+                      <div className="flex items-center gap-1">
+                        {col.label}
+                        <SortIcon col={col.key} />
+                      </div>
+                    </th>
+                  ))}
+                  <th className="text-left py-3 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">System Details</th>
+                  {([
                     { key: 'preferred_date' as SortKey, label: 'Pref. Date' },
                     { key: 'created_at' as SortKey, label: 'Submitted On' },
                   ] as Array<{ key: SortKey; label: string }>).map((col, i) => (
@@ -234,7 +244,7 @@ export function MaintenanceListPage() {
               </thead>
               <tbody>
                 {isLoading ? (
-                  <tr><td colSpan={6} className="py-12 text-center text-slate-500">Loading requests...</td></tr>
+                  <tr><td colSpan={7} className="py-12 text-center text-slate-500">Loading requests...</td></tr>
                 ) : paged.length > 0 ? (
                   paged.map(r => (
                     <tr key={r.id} className="border-b border-slate-200 hover:bg-slate-50 transition-colors">
@@ -253,6 +263,9 @@ export function MaintenanceListPage() {
                         )}>
                           {r.status}
                         </span>
+                      </td>
+                      <td className="py-3 px-4 text-slate-600 dark:text-slate-300">
+                        {r.system_details || 'N/A'}
                       </td>
                       <td className="py-3 px-4 text-slate-600 dark:text-slate-300">
                         {r.preferred_date ? new Date(r.preferred_date).toLocaleDateString() : 'N/A'}
